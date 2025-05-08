@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "node src/server/index.js",
-    "dev:server": "nodemon src/server/index.js"
+    "server": "tsc -p tsconfig.server.json && node dist/server/index.js",
+    "dev:server": "nodemon --exec ts-node src/server/index.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.8.1",

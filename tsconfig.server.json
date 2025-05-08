@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext", // Output ES modules, as your package.json has "type": "module"
+    "moduleResolution": "NodeNext", // Suitable for Node.js with ES modules
+    "outDir": "./dist/server",       // Output directory for compiled JS files
+    "rootDir": "./src/server",       // Specify root to maintain folder structure in outDir
+    "strict": true,
+    "esModuleInterop": true, // Improves compatibility with CommonJS modules
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true, // Allows importing JSON files
+    "sourceMap": true, // Generates source maps for easier debugging
+    "noEmit": false // Ensure files are emitted (opposite of tsconfig.node.json)
+  },
+  "include": [
+    "src/server/**/*.ts" // Specify which files to compile
+  ],
+  "exclude": ["node_modules", "dist"] // Exclude node_modules and the output directory itself
+}
