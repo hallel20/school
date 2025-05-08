@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole, isCourseLecturer } from '../middleware/auth.js';
+import { verifyToken, hasRole, isCourseLecturer, RequestWithUser } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -14,7 +14,7 @@ const courseValidation = [
 ];
 
 // Get all courses
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken, async (_req, res) => {
   try {
     const courses = await prisma.course.findMany({
       include: {
@@ -24,6 +24,7 @@ router.get('/', verifyToken, async (req, res) => {
     });
     res.json(courses);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -43,15 +44,16 @@ router.get('/:id', verifyToken, async (req, res) => {
     }
     res.json(course);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create course - Admin only
-router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req, res) => {
+router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Request, res: Response) => {
   try {
     const { name, code, credits, lecturerId } = req.body;
-    
+
     const course = await prisma.course.create({
       data: {
         name,
@@ -66,6 +68,7 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req, re
 
     res.status(201).json(course);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -74,7 +77,7 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req, re
 router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
     const { name, code, credits, lecturerId } = req.body;
-    
+
     const course = await prisma.course.update({
       where: { id: parseInt(req.params.id) },
       data: {
@@ -90,6 +93,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 
     res.json(course);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -102,23 +106,28 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     });
     res.status(204).send();
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Register student for course
-router.post('/:id/register', verifyToken, hasRole('Student'), async (req, res) => {
+router.post('/:id/register', verifyToken, hasRole('Student'), async (req: RequestWithUser, res: Response) => {
   try {
+    const studentId = req.user?.studentId;
+    if (!studentId) throw new Error('Student ID not found');
+
     const course = await prisma.course.update({
       where: { id: parseInt(req.params.id) },
       data: {
         students: {
-          connect: { id: req.user.studentId }
+          connect: { id: studentId }
         }
       }
     });
     res.json(course);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -132,8 +141,11 @@ router.get('/:id/students', verifyToken, hasRole('Staff'), isCourseLecturer, asy
         students: true
       }
     });
-    res.json(course.students);
+    const students = course?.students || [];
+
+    res.json(students);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });

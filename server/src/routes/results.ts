@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole, isCourseLecturer } from '../middleware/auth.js';
+import { verifyToken, hasRole, isCourseLecturer, RequestWithUser } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -13,10 +13,10 @@ const resultValidation = [
 ];
 
 // Get student results
-router.get('/student/:studentId', verifyToken, async (req, res) => {
+router.get('/student/:studentId', verifyToken, async (req: RequestWithUser, res: Response) => {
   try {
     // Students can only view their own results
-    if (req.user.role === 'Student' && req.user.studentId !== parseInt(req.params.studentId)) {
+    if (req.user?.role === 'Student' && req.user.studentId !== parseInt(req.params.studentId)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
@@ -30,6 +30,7 @@ router.get('/student/:studentId', verifyToken, async (req, res) => {
     });
     res.json(results);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -47,20 +48,21 @@ router.get('/course/:courseId', verifyToken, hasRole('Staff'), isCourseLecturer,
     });
     res.json(results);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create/Update result - Staff only
-router.post('/course/:courseId/student/:studentId', 
-  verifyToken, 
-  hasRole('Staff'), 
+router.post('/course/:courseId/student/:studentId',
+  verifyToken,
+  hasRole('Staff'),
   isCourseLecturer,
   resultValidation,
-  async (req, res) => {
+  async (req: RequestWithUser, res: Response) => {
     try {
       const { score, grade, academicSessionId, semesterId } = req.body;
-      
+
       const result = await prisma.result.upsert({
         where: {
           studentId_courseId_academicSessionId_semesterId: {
@@ -92,9 +94,10 @@ router.post('/course/:courseId/student/:studentId',
 
       res.json(result);
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Server error' });
     }
-});
+  });
 
 // Delete result - Admin only
 router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
@@ -104,6 +107,7 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     });
     res.status(204).send();
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });

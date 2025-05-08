@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole } from '../middleware/auth.js';
+import { verifyToken, hasRole } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -18,7 +18,7 @@ const semesterValidation = [
 ];
 
 // Get all academic sessions
-router.get('/sessions', verifyToken, async (req, res) => {
+router.get('/sessions', verifyToken, async (_req, res) => {
   try {
     const sessions = await prisma.academicSession.findMany({
       include: {
@@ -27,6 +27,7 @@ router.get('/sessions', verifyToken, async (req, res) => {
     });
     res.json(sessions);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -45,15 +46,16 @@ router.get('/sessions/:id', verifyToken, async (req, res) => {
     }
     res.json(session);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create academic session - Admin only
-router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async (req, res) => {
+router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    
+
     const session = await prisma.academicSession.create({
       data: { name },
       include: {
@@ -63,15 +65,16 @@ router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async
 
     res.status(201).json(session);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Update academic session - Admin only
-router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, async (req, res) => {
+router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    
+
     const session = await prisma.academicSession.update({
       where: { id: parseInt(req.params.id) },
       data: { name },
@@ -82,6 +85,7 @@ router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, as
 
     res.json(session);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -94,12 +98,13 @@ router.delete('/sessions/:id', verifyToken, hasRole('Admin'), async (req, res) =
     });
     res.status(204).send();
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Get all semesters
-router.get('/semesters', verifyToken, async (req, res) => {
+router.get('/semesters', verifyToken, async (_req, res) => {
   try {
     const semesters = await prisma.semester.findMany({
       include: {
@@ -108,6 +113,7 @@ router.get('/semesters', verifyToken, async (req, res) => {
     });
     res.json(semesters);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -126,15 +132,16 @@ router.get('/semesters/:id', verifyToken, async (req, res) => {
     }
     res.json(semester);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create semester - Admin only
-router.post('/semesters', verifyToken, hasRole('Admin'), semesterValidation, async (req, res) => {
+router.post('/semesters', verifyToken, hasRole('Admin'), semesterValidation, async (req: Request, res: Response) => {
   try {
     const { name, academicSessionId } = req.body;
-    
+
     const semester = await prisma.semester.create({
       data: {
         name,
@@ -147,15 +154,16 @@ router.post('/semesters', verifyToken, hasRole('Admin'), semesterValidation, asy
 
     res.status(201).json(semester);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Update semester - Admin only
-router.put('/semesters/:id', verifyToken, hasRole('Admin'), semesterValidation, async (req, res) => {
+router.put('/semesters/:id', verifyToken, hasRole('Admin'), semesterValidation, async (req: Request, res: Response) => {
   try {
     const { name, academicSessionId } = req.body;
-    
+
     const semester = await prisma.semester.update({
       where: { id: parseInt(req.params.id) },
       data: {
@@ -169,6 +177,7 @@ router.put('/semesters/:id', verifyToken, hasRole('Admin'), semesterValidation, 
 
     res.json(semester);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -181,6 +190,7 @@ router.delete('/semesters/:id', verifyToken, hasRole('Admin'), async (req, res) 
     });
     res.status(204).send();
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });

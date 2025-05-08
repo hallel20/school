@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole } from '../middleware/auth.js';
+import { verifyToken, hasRole } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ const userValidation = [
 ];
 
 // Get all users - Admin only
-router.get('/', verifyToken, hasRole('Admin'), async (req, res) => {
+router.get('/', verifyToken, hasRole('Admin'), async (_req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
       include: {
@@ -25,6 +25,7 @@ router.get('/', verifyToken, hasRole('Admin'), async (req, res) => {
     });
     res.json(users);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -44,12 +45,13 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     }
     res.json(user);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create user - Admin only
-router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req, res) => {
+router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Request, res: Response) => {
   try {
     const { email, password, role, firstName, lastName } = req.body;
     
@@ -87,6 +89,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req, res)
 
     res.status(201).json(user);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -126,6 +129,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 
     res.json(user);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -138,6 +142,7 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     });
     res.status(204).send();
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });

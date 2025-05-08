@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole } from '../middleware/auth.js';
+import { verifyToken, hasRole } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ const settingsValidation = [
 ];
 
 // Get school settings
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken, async (_req: Request, res: Response) => {
   try {
     const settings = await prisma.schoolSetting.findFirst({
       include: {
@@ -24,15 +24,16 @@ router.get('/', verifyToken, async (req, res) => {
     });
     res.json(settings);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Update school settings - Admin only
-router.put('/', verifyToken, hasRole('Admin'), settingsValidation, async (req, res) => {
+router.put('/', verifyToken, hasRole('Admin'), settingsValidation, async (req: Request, res: Response) => {
   try {
     const { name, address, currentAcademicSessionId, semestersPerSession } = req.body;
-    
+
     const settings = await prisma.schoolSetting.upsert({
       where: { id: 1 },
       update: {
@@ -54,6 +55,7 @@ router.put('/', verifyToken, hasRole('Admin'), settingsValidation, async (req, r
 
     res.json(settings);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });

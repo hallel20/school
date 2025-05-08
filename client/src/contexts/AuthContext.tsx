@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.setItem('user', JSON.stringify(mockUser));
       
       setUser(mockUser);
-    } catch (err) {
+    } catch (err: Error | any) {
       setError(err.message || 'Login failed');
       throw err;
     } finally {

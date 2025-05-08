@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken } from '../middleware/auth.js';
+import { RequestWithUser, verifyToken } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -15,10 +15,10 @@ const loginValidation = [
 ];
 
 // Login route - Public
-router.post('/login', loginValidation, async (req, res) => {
+router.post('/login', loginValidation, async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    
+
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -27,27 +27,33 @@ router.post('/login', loginValidation, async (req, res) => {
       }
     });
 
+    const JWT_SECRET = process.env.JWT_SECRET as string;
+    if (!JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined');
+    }
+
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '24h' }
     );
 
     res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Get current user - Protected
-router.get('/me', verifyToken, async (req, res) => {
+router.get('/me', verifyToken, async (req: RequestWithUser, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
+      where: { id: req.user?.id },
       include: {
         student: true,
         staff: true
@@ -56,6 +62,7 @@ router.get('/me', verifyToken, async (req, res) => {
 
     res.json(user);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 });
