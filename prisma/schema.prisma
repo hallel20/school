@@ -1,0 +1,96 @@
+// Prisma schema for School Management Portal
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String // "Student", "Staff", "Admin"
+  student   Student? @relation(fields: [studentId], references: [id])
+  studentId Int?     @unique
+  staff     Staff?   @relation(fields: [staffId], references: [id])
+  staffId   Int?     @unique
+}
+
+model Student {
+  id         Int      @id @default(autoincrement())
+  user       User?
+  userId     Int?     @unique
+  studentId  String   @unique // Unique student identifier
+  firstName  String
+  lastName   String
+  courses    Course[] @relation("StudentCourses")
+  results    Result[]
+}
+
+model Staff {
+  id              Int      @id @default(autoincrement())
+  user            User?
+  userId          Int?     @unique
+  staffId         String   @unique // Unique staff identifier
+  firstName       String
+  lastName        String
+  assignedCourses Course[]
+}
+
+model Course {
+  id         Int       @id @default(autoincrement())
+  name       String
+  code       String    @unique
+  credits    Int
+  lecturer   Staff?    @relation(fields: [lecturerId], references: [id])
+  lecturerId Int?
+  students   Student[] @relation("StudentCourses")
+  results    Result[]
+}
+
+model Result {
+  id                Int            @id @default(autoincrement())
+  student           Student        @relation(fields: [studentId], references: [id])
+  studentId         Int
+  course            Course         @relation(fields: [courseId], references: [id])
+  courseId          Int
+  academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
+  academicSessionId Int
+  semester          Semester       @relation(fields: [semesterId], references: [id])
+  semesterId        Int
+  score             Float
+  grade             String?
+
+  @@unique([studentId, courseId, academicSessionId, semesterId])
+}
+
+model AcademicSession {
+  id               Int              @id @default(autoincrement())
+  name             String           @unique // e.g., "2024/2025"
+  semesters        Semester[]
+  results          Result[]
+  schoolSetting    SchoolSetting?
+}
+
+model Semester {
+  id                 Int              @id @default(autoincrement())
+  name               String           // e.g., "First Semester", "Second Semester"
+  academicSession    AcademicSession  @relation(fields: [academicSessionId], references: [id])
+  academicSessionId  Int
+  results            Result[]
+
+  @@unique([academicSessionId, name])
+}
+
+model SchoolSetting {
+  id                      Int               @id @default(autoincrement())
+  name                    String
+  address                 String
+  currentAcademicSessionId Int?              @unique
+  currentAcademicSession  AcademicSession?  @relation(fields: [currentAcademicSessionId], references: [id])
+  semestersPerSession     Int               @default(2)
+}
