@@ -16,4 +16,4 @@ COPY package*.json ./
 RUN npm install
 
 # Set the command to start the server
-CMD ["node", "index.js"] # Assuming your entry point is index.js in the dist folder
+CMD ["node", "index.js"]
