@@ -61,7 +61,7 @@ const AdminDashboard = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto pb-10">
+        <main className="flex-1 overflow-y-auto pb-10 max-w-full">
           <Suspense fallback={<Spinner />}>
             <Routes>
               <Route path="/" element={<Overview />} />
