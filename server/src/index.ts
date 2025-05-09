@@ -20,25 +20,30 @@ dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
 
-const options = {
-  key: fs.readFileSync('/etc/nginx/ssl/privkey.pem'), // Adjust the path if necessary inside the container
-  cert: fs.readFileSync('/etc/nginx/ssl/fullchain.pem'), // Adjust the path if necessary inside the container
-};
-
 const app = express();
 
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    const allowedOrigins = [
+      'http://localhost:5173', // Development frontend
+      'https://school.cyberwizdev.com.ng', // Production frontend
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
+};
+
+
 // Middleware
-app.use(cors({
-  allowedHeaders: '*',
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:80',
-    'http://school.cyberwizdev.com.ng',
-    'https://school.cyberwizdev.com.ng'
-  ]
-}));
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
@@ -56,6 +61,11 @@ if (env === 'development') {
   console.log(`Server running on port ${PORT}`);
   });
 } else {
+  const options = {
+    key: fs.readFileSync('/etc/nginx/ssl/privkey.pem'), // Adjust the path if necessary inside the container
+    cert: fs.readFileSync('/etc/nginx/ssl/fullchain.pem'), // Adjust the path if necessary inside the container
+  };
+
   https.createServer(options, app).listen(5000, () => {
     console.log('Server is running on port 5000');
   });

@@ -9,7 +9,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = getCookie('token');
-    // console.log(token)
+    console.log(import.meta.env.VITE_API_BASE_URL)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
