@@ -28,8 +28,8 @@ services:
       # Add other server environment variables here, e.g.,
       # - DATABASE_URL=your_database_url
     volumes:
-      - /etc/letsencrypt/live/school.cyberwizdev.com.ng/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-      - /etc/letsencrypt/live/school.cyberwizdev.com.ng/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+      - /etc/letsencrypt/live/api.school.cyberwizdev.com.ng/fullchain.pem:/etc/nginx/ssl/api.fullchain.pem:ro
+      - /etc/letsencrypt/live/api.school.cyberwizdev.com.ng/privkey.pem:/etc/nginx/ssl/api.privkey.pem:ro
       - ./server:/app # Mounts the server directory for development and hot-reloading
       - /app/node_modules # Persists node_modules across container restarts (optional in production)
 
