@@ -4,8 +4,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-CMD ["npm", "run", "prisma:generate"]
-CMD ["npm", "run", "build"]
 
 # Set the command to start the server
 CMD ["npm", "start"]
