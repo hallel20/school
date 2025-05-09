@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { School, AtSign, Lock } from 'lucide-react';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -10,20 +10,22 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
+
     try {
       await login(email, password);
-      
+
       // Navigate based on user role
-      const user = JSON.parse(localStorage.getItem('user'));
+      const storageUser = localStorage.getItem('user');
+      if (!storageUser) return;
+      const user = JSON.parse(storageUser);
       if (user) {
         switch (user.role) {
           case 'Admin':
@@ -40,6 +42,7 @@ const Login = () => {
         }
       }
     } catch (err) {
+      console.error(err);
       setError('Invalid email or password');
     } finally {
       setIsLoading(false);
@@ -121,9 +124,15 @@ const Login = () => {
 
             <div className="mt-6 grid grid-cols-1 gap-3">
               <div className="text-sm text-gray-700 dark:text-gray-300">
-                <p><strong>Admin:</strong> admin@school.com / password</p>
-                <p><strong>Staff:</strong> staff@school.com / password</p>
-                <p><strong>Student:</strong> student@school.com / password</p>
+                <p>
+                  <strong>Admin:</strong> admin@school.com / password
+                </p>
+                <p>
+                  <strong>Staff:</strong> staff@school.com / password
+                </p>
+                <p>
+                  <strong>Student:</strong> student@school.com / password
+                </p>
               </div>
             </div>
           </div>

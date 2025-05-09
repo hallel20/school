@@ -3,7 +3,7 @@ import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import BarChart from '../../components/charts/BarChart';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { BookOpen, Users, FileText, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

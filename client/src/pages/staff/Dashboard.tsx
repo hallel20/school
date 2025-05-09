@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import Sidebar from '../../components/ui/Sidebar';
 import Overview from './Overview';
 import Courses from './Courses';
@@ -14,8 +14,9 @@ const StaffDashboard = () => {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
-  
+
   return (
     <div className="h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900">
       {/* Mobile menu button */}
@@ -41,17 +42,19 @@ const StaffDashboard = () => {
           </svg>
         </button>
       </div>
-      
+
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         md:block
         ${isMobileMenuOpen ? 'block' : 'hidden'}
         md:static fixed inset-0 z-10
         bg-white dark:bg-gray-800
-      `}>
+      `}
+      >
         <Sidebar role="Staff" />
       </div>
-      
+
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto pb-10">
