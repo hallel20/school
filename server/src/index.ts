@@ -62,8 +62,8 @@ if (env === 'development') {
   });
 } else {
   const options = {
-    key: fs.readFileSync('/etc/nginx/ssl/privkey.pem'), // Adjust the path if necessary inside the container
-    cert: fs.readFileSync('/etc/nginx/ssl/fullchain.pem'), // Adjust the path if necessary inside the container
+    key: fs.readFileSync('/etc/nginx/ssl/api.privkey.pem'), // Adjust the path if necessary inside the container
+    cert: fs.readFileSync('/etc/nginx/ssl/api.fullchain.pem'), // Adjust the path if necessary inside the container
   };
 
   https.createServer(options, app).listen(5000, () => {
