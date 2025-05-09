@@ -12,6 +12,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./
 COPY package*.json ./
 RUN npm install
+RUN npx prisma generate
 RUN npm run build
 
 # Set the command to start the server
