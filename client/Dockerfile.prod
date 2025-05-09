@@ -19,4 +19,5 @@ COPY ssl-params /etc/nginx/
 EXPOSE 80 443
 
 # CMD ["nginx", "-g", "daemon off;"]
-CMD ["sleep", "3600"] # Keep the container running for an hour
+# Keep the container running for an hour
+CMD ["sleep", "3600"]
