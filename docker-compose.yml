@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  client:
+    build:
+      context: ./client # Specifies the directory containing the client's Dockerfile
+      dockerfile: Dockerfile.prod  # Uses a production-specific Dockerfile for the client
+    ports:
+      - "80:80" # Maps port 80 on the host to port 80 in the client container (typical for web traffic)
+      - "443:443" # Maps port 443 on the host to port 443 in the client container (for HTTPS) - requires further setup for SSL certificates
+    environment:
+      - NODE_ENV=production # Sets the environment to production for optimized builds and behavior
+      # In production, volumes for code changes are not needed:
+      # volumes:
+      #   - ./client:/app  
+    depends_on:
+      - server
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod # Uses a production-specific Dockerfile for the server
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      # Add other server environment variables here, e.g.,
+      # - DATABASE_URL=your_database_url
+    volumes:
+      - ./server:/app # Mounts the server directory for development and hot-reloading
+      - /app/node_modules # Persists node_modules across container restarts (optional in production)
+
+  # If using a database, add its service here, e.g.,
+  # db:
+  #   image: postgres:latest
+  #   ports:
+  #     - "5432:5432"
