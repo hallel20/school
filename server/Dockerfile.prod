@@ -8,6 +8,6 @@ CMD ["npm", "run", "prisma:generate"]
 CMD ["npm", "run", "build"]
 
 # Set the command to start the server
-# CMD ["npm", "start"]
+CMD ["npm", "start"]
 # Keep the container running for an hour
-CMD ["sleep", "3600"]
+# CMD ["sleep", "3600"]
