@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { School, AtSign, Lock } from 'lucide-react';
@@ -11,7 +11,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -21,26 +21,6 @@ const Login = () => {
 
     try {
       await login(email, password);
-
-      // Navigate based on user role
-      const storageUser = localStorage.getItem('user');
-      if (!storageUser) return;
-      const user = JSON.parse(storageUser);
-      if (user) {
-        switch (user.role) {
-          case 'Admin':
-            navigate('/admin');
-            break;
-          case 'Staff':
-            navigate('/staff');
-            break;
-          case 'Student':
-            navigate('/student');
-            break;
-          default:
-            navigate('/');
-        }
-      }
     } catch (err) {
       console.error(err);
       setError('Invalid email or password');
@@ -48,6 +28,25 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      switch (user.role) {
+        case 'Admin':
+          navigate('/admin');
+          break;
+        case 'Staff':
+          navigate('/staff');
+          break;
+        case 'Student':
+          navigate('/student');
+          break;
+        default:
+          navigate('/');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

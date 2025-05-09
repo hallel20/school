@@ -1,69 +1,85 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './hooks/useAuth';
-import Login from './pages/Login';
-import StudentDashboard from './pages/student/Dashboard';
-import StaffDashboard from './pages/staff/Dashboard';
-import AdminDashboard from './pages/admin/Dashboard';
-import NotFound from './pages/NotFound';
+import Spinner from './components/ui/Spinner';
+
+// Lazy load page components
+const Login = lazy(() => import('./pages/Login'));
+const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
+const StaffDashboard = lazy(() => import('./pages/staff/Dashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+interface Props {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}
 
 // Protected route component
-const ProtectedRoute = ({ children, allowedRoles }) => {
+const ProtectedRoute = ({ children, allowedRoles }: Props) => {
   const { user, isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+
+  if (allowedRoles && !allowedRoles.includes(user!.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
-  
+
   return children;
 };
 
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            
-            <Route 
-              path="/student/*" 
-              element={
-                <ProtectedRoute allowedRoles={['Student']}>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/staff/*" 
-              element={
-                <ProtectedRoute allowedRoles={['Staff']}>
-                  <StaffDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/admin/*" 
-              element={
-                <ProtectedRoute allowedRoles={['Admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route path="/unauthorized" element={<div>Unauthorized</div>} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
+      <Router>
+        <AuthProvider>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+
+              <Route
+                path="/student/*"
+                element={
+                  <ProtectedRoute allowedRoles={['Student']}>
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/staff/*"
+                element={
+                  <ProtectedRoute allowedRoles={['Staff']}>
+                    <StaffDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute allowedRoles={['Admin']}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route path="/unauthorized" element={<div>Unauthorized</div>} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

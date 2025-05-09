@@ -1,23 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+// import { useAuth } from '../../hooks/useAuth';
 import Sidebar from '../../components/ui/Sidebar';
-import PageHeader from '../../components/ui/PageHeader';
-import Overview from './Overview';
-import Users from './Users';
-import Courses from './Courses';
-import AcademicSessions from './AcademicSessions';
-import Settings from './Settings';
+import Spinner from '../../components/ui/Spinner'; // Import the Spinner
+
+// Lazy load dashboard page components
+const Overview = lazy(() => import('./Overview'));
+const Users = lazy(() => import('./Users'));
+const Courses = lazy(() => import('./Courses'));
+const AcademicSessions = lazy(() => import('./AcademicSessions'));
+const Settings = lazy(() => import('./Settings'));
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
-  
+
   return (
     <div className="h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900">
       {/* Mobile menu button */}
@@ -43,28 +46,35 @@ const AdminDashboard = () => {
           </svg>
         </button>
       </div>
-      
+
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         md:block
         ${isMobileMenuOpen ? 'block' : 'hidden'}
         md:static fixed inset-0 z-10
         bg-white dark:bg-gray-800
-      `}>
+      `}
+      >
         <Sidebar role="Admin" />
       </div>
-      
+
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto pb-10">
-          <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/users/*" element={<Users />} />
-            <Route path="/courses/*" element={<Courses />} />
-            <Route path="/academic-sessions/*" element={<AcademicSessions />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/admin" replace />} />
-          </Routes>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
+              <Route path="/" element={<Overview />} />
+              <Route path="/users/*" element={<Users />} />
+              <Route path="/courses/*" element={<Courses />} />
+              <Route
+                path="/academic-sessions/*"
+                element={<AcademicSessions />}
+              />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

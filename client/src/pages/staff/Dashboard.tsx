@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+// import { useAuth } from '../../hooks/useAuth';
 import Sidebar from '../../components/ui/Sidebar';
-import Overview from './Overview';
-import Courses from './Courses';
-import Results from './Results';
-import Profile from './Profile';
+import Spinner from '../../components/ui/Spinner'; // Import the Spinner
+
+// Lazy load dashboard page components
+const Overview = lazy(() => import('./Overview'));
+const Courses = lazy(() => import('./Courses'));
+const Results = lazy(() => import('./Results'));
+const Profile = lazy(() => import('./Profile'));
 
 const StaffDashboard = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Close mobile menu when route changes
@@ -58,13 +61,15 @@ const StaffDashboard = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto pb-10">
-          <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/courses/*" element={<Courses />} />
-            <Route path="/results/*" element={<Results />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<Navigate to="/staff" replace />} />
-          </Routes>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
+              <Route path="/" element={<Overview />} />
+              <Route path="/courses/*" element={<Courses />} />
+              <Route path="/results/*" element={<Results />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="*" element={<Navigate to="/staff" replace />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

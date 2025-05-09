@@ -96,8 +96,11 @@ function Table<T>({
                 {columns.map((column, index) => (
                   <td
                     key={index}
-                    className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
+                    className={`px-6 py-4 whitespace-nowrap ${
+                      column.className || ''
+                    }`}
                   >
+                    {/* @ts-ignore */}
                     {getCellValue(row, column.accessor)}
                   </td>
                 ))}
