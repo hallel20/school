@@ -21,7 +21,9 @@ router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Respons
     const { page = 1, pageSize = 20, role } = req.query;
     const pageNumber = Number(page);
     const pageSizeNumber = Number(pageSize);
-    const where: any = {};
+    const where: any = {
+      isDeleted: false,
+    };
 
     if (role) {
       where.role = role as string;
@@ -58,7 +60,7 @@ router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Respons
 router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params.id), isDeleted: false },
       include: {
         student: true,
         staff: true
@@ -189,8 +191,9 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 // Delete user - Admin only
 router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
-    await prisma.user.delete({
-      where: { id: parseInt(req.params.id) }
+    await prisma.user.update({
+      where: { id: parseInt(req.params.id) },
+      data: { isDeleted: true }
     });
     res.status(204).send();
   } catch (error) {
