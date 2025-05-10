@@ -8,6 +8,7 @@ import {
 import { useAuth } from './hooks/useAuth';
 import Spinner from './components/ui/Spinner';
 import Providers from './Providers';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy load page components
 const Login = lazy(() => import('./pages/Login'));
@@ -42,46 +43,48 @@ const ProtectedRoute = ({ children, allowedRoles }: Props) => {
 
 function App() {
   return (
-    <Router>
-      <Providers>
-        <Suspense fallback={<Spinner />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+    <ErrorBoundary>
+      <Router>
+        <Providers>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
 
-            <Route
-              path="/student/*"
-              element={
-                <ProtectedRoute allowedRoles={['Student']}>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/student/*"
+                element={
+                  <ProtectedRoute allowedRoles={['Student']}>
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/staff/*"
-              element={
-                <ProtectedRoute allowedRoles={['Staff']}>
-                  <StaffDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/staff/*"
+                element={
+                  <ProtectedRoute allowedRoles={['Staff']}>
+                    <StaffDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute allowedRoles={['Admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute allowedRoles={['Admin']}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="/unauthorized" element={<div>Unauthorized</div>} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </Providers>
-    </Router>
+              <Route path="/unauthorized" element={<div>Unauthorized</div>} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </Providers>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

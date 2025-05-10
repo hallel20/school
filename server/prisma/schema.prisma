@@ -121,3 +121,22 @@ enum ErrorOrigin {
   client
   server
 }
+
+enum TableName {
+  user
+  student
+  staff
+  course
+  result
+  academicSession
+  semester
+  schoolSetting
+  notification
+  log
+}
+
+model NextId {
+  id        Int       @id @default(autoincrement())
+  tableName TableName @unique
+  nextId    Int
+}
