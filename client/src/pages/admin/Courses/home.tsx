@@ -45,11 +45,11 @@ const CoursesList = () => {
   const { openDeleteConfirmation, DeleteModal } = useDeleteConfirmation();
 
   const handlePageChange = (page: number) => {
-    navigate(`/admin/users?page=${page}&pageSize=${pageSize}`);
+    navigate(`/admin/courses?page=${page}&pageSize=${pageSize}`);
   };
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    navigate(`/admin/users?page=${page}&pageSize=${size}`);
+    navigate(`/admin/courses?page=${page}&pageSize=${size}`);
   };
 
   const columns = [
@@ -129,22 +129,21 @@ const CoursesList = () => {
             </Button>
           }
         />
-
+        <div className="flex justify-end items-center gap-2 pb-3">
+          <Select
+            label="Page Size"
+            value={pageSize}
+            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+            options={[
+              { label: '5', value: 5 },
+              { label: '10', value: 10 },
+              { label: '20', value: 20 },
+              { label: '50', value: 50 },
+              { label: '100', value: 100 },
+            ]}
+          />
+        </div>
         <Card>
-          <div className="flex justify-end items-center gap-2">
-            <Select
-              label="Page Size"
-              value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              options={[
-                { label: '5', value: 5 },
-                { label: '10', value: 10 },
-                { label: '20', value: 20 },
-                { label: '50', value: 50 },
-                { label: '100', value: 100 },
-              ]}
-            />
-          </div>
           <Table
             columns={columns}
             data={courses}
@@ -155,7 +154,7 @@ const CoursesList = () => {
         </Card>
         <Pagination
           totalPages={totalPages}
-          currentPage={1}
+          currentPage={Number(page)}
           onPageChange={handlePageChange}
         />
       </div>
