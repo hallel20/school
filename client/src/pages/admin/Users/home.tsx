@@ -103,13 +103,17 @@ const UsersList = () => {
             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
             onClick={(e) => {
               e.stopPropagation();
-              openDeleteConfirmation(`user ${user.email}`, async () => {
-                await toast.promise(api.delete(`/users/${user.id}`), {
-                  loading: 'Deleting...',
-                  success: `Deleted user ${user.email}`,
-                  error: `Failed to delete user ${user.email}`,
-                });
-                refetch();
+              openDeleteConfirmation({
+                title: 'Delete User',
+                message: `Are you sure you want to delete user ${user?.email}?`,
+                onConfirm: async () => {
+                  await toast.promise(api.delete(`/users/${user.id}`), {
+                    loading: 'Deleting...',
+                    success: `Deleted user ${user.email}`,
+                    error: `Failed to delete user ${user.email}`,
+                  });
+                  refetch();
+                },
               });
             }}
           >
