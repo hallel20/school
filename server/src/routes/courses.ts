@@ -14,15 +14,31 @@ const courseValidation = [
 ];
 
 // Get all courses
-router.get('/', verifyToken, async (_req, res) => {
+router.get('/', verifyToken, async (req: Request, res: Response) => {
   try {
+    const { page = 1, pageSize = 20 } = req.query;
+    const pageNumber = Number(page);
+    const pageSizeNumber = Number(pageSize);
+
     const courses = await prisma.course.findMany({
       include: {
         lecturer: true,
-        students: true
-      }
+      },
+      take: pageSizeNumber,
+      skip: (pageNumber - 1) * pageSizeNumber,
     });
-    res.send(courses);
+    const allCoursesCount = await prisma.course.count();
+    const totalPages = Math.ceil(allCoursesCount / pageSizeNumber);
+
+    const response = {
+      courses,
+      page: pageNumber,
+      pageSize: pageSizeNumber,
+      totalPages,
+      totalCourses: allCoursesCount,
+    };
+
+    res.send(response);
   } catch (error) {
     console.log(error)
     res.status(500).send({ message: 'Server error' });
@@ -54,6 +70,13 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
   try {
     const { name, code, credits, lecturerId } = req.body;
 
+    const existingCourse = await prisma.course.findUnique({
+      where: { code },
+    });
+    if (existingCourse) {
+      return res.status(400).send({ message: 'Course with this code already exists' });
+    }
+
     const course = await prisma.course.create({
       data: {
         name,
@@ -84,7 +107,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
         name,
         code,
         credits,
-        lecturerId: lecturerId ? parseInt(lecturerId) : null
+        lecturerId: lecturerId ? parseInt(lecturerId) : undefined
       },
       include: {
         lecturer: true
