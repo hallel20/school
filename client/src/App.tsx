@@ -24,7 +24,11 @@ interface Props {
 
 // Protected route component
 const ProtectedRoute = ({ children, allowedRoles }: Props) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, sessionLoading } = useAuth();
+
+  if (sessionLoading) {
+    return <Spinner />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

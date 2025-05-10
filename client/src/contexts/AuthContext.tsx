@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   error: string | null;
+  sessionLoading: boolean;
 }
 
 // Create context
@@ -24,7 +25,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [error, setError] = useState<string | null>(null);
   const token = getCookie('token') || localStorage.getItem('token');
   const {
-    session: { user },
+    session: { user, loading: sessionLoading },
     refetch,
   } = useSession();
 
@@ -55,21 +56,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     window.location.href = '/login';
   };
 
-  const storageUser = localStorage.getItem('user');
-  let fallBackUser;
-  if (storageUser) {
-    fallBackUser = JSON.parse(storageUser);
-  }
-
   return (
     <AuthContext.Provider
       value={{
-        user: user || fallBackUser,
+        user,
         isAuthenticated: !!token,
         isLoading,
         login,
         logout,
         error,
+        sessionLoading,
       }}
     >
       {children}
