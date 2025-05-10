@@ -5,63 +5,64 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { User, Mail, Key, Save } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
   const { user } = useAuth();
-  
+
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || 'Staff',
     lastName: user?.lastName || 'User',
     email: user?.email || 'staff@school.com',
     staffId: 'STAFF001',
   });
-  
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
-  
+
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
-  
+
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({
+    setPasswordData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   const handleProfileSubmit = (e) => {
     e.preventDefault();
     setIsProfileLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsProfileLoading(false);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     }, 1000);
   };
-  
+
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New password and confirm password do not match!');
+      toast.success('New password and confirm password do not match!');
       return;
     }
-    
+
     setIsPasswordLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsPasswordLoading(false);
@@ -70,17 +71,17 @@ const Profile = () => {
         newPassword: '',
         confirmPassword: '',
       });
-      alert('Password changed successfully!');
+      toast.success('Password changed successfully!');
     }, 1000);
   };
-  
+
   return (
     <div className="px-4 py-6">
-      <PageHeader 
-        title="My Profile" 
+      <PageHeader
+        title="My Profile"
         subtitle="View and update your personal information"
       />
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Card */}
         <div className="lg:col-span-1">
@@ -89,25 +90,27 @@ const Profile = () => {
               <div className="w-32 h-32 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                 <User size={64} className="text-gray-600 dark:text-gray-400" />
               </div>
-              
+
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-1">
                 {profileData.firstName} {profileData.lastName}
               </h3>
-              
+
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Staff ID: {profileData.staffId}
               </p>
-              
+
               <div className="w-full border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
                 <div className="flex items-center mb-2">
                   <Mail size={16} className="text-gray-500 mr-2" />
-                  <span className="text-gray-700 dark:text-gray-300">{profileData.email}</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {profileData.email}
+                  </span>
                 </div>
               </div>
             </div>
           </Card>
         </div>
-        
+
         {/* Update Profile Form */}
         <div className="lg:col-span-2">
           <Card title="Update Profile">
@@ -122,7 +125,7 @@ const Profile = () => {
                   fullWidth
                   required
                 />
-                
+
                 <Input
                   label="Last Name"
                   id="lastName"
@@ -132,7 +135,7 @@ const Profile = () => {
                   fullWidth
                   required
                 />
-                
+
                 <Input
                   label="Email Address"
                   id="email"
@@ -143,7 +146,7 @@ const Profile = () => {
                   fullWidth
                   required
                 />
-                
+
                 <Input
                   label="Staff ID"
                   id="staffId"
@@ -154,7 +157,7 @@ const Profile = () => {
                   fullWidth
                 />
               </div>
-              
+
               <div className="flex justify-end">
                 <Button
                   type="submit"
@@ -167,7 +170,7 @@ const Profile = () => {
               </div>
             </form>
           </Card>
-          
+
           <Card title="Change Password" className="mt-6">
             <form onSubmit={handlePasswordSubmit}>
               <div className="space-y-4 mb-6">
@@ -182,7 +185,7 @@ const Profile = () => {
                   required
                   leftIcon={<Key size={16} />}
                 />
-                
+
                 <Input
                   label="New Password"
                   id="newPassword"
@@ -194,7 +197,7 @@ const Profile = () => {
                   required
                   leftIcon={<Key size={16} />}
                 />
-                
+
                 <Input
                   label="Confirm New Password"
                   id="confirmPassword"
@@ -207,7 +210,7 @@ const Profile = () => {
                   leftIcon={<Key size={16} />}
                 />
               </div>
-              
+
               <div className="flex justify-end">
                 <Button
                   type="submit"

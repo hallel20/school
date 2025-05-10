@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useTheme } from '../../contexts/ThemeContext';
 import {
   School,
   Users,
@@ -16,6 +15,7 @@ import {
   ChevronRight,
   BarChart,
 } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 interface NavItem {
   title: string;

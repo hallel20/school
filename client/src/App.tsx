@@ -5,10 +5,9 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import Spinner from './components/ui/Spinner';
+import Providers from './Providers';
 
 // Lazy load page components
 const Login = lazy(() => import('./pages/Login'));
@@ -43,48 +42,46 @@ const ProtectedRoute = ({ children, allowedRoles }: Props) => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <AuthProvider>
-          <Suspense fallback={<Spinner />}>
-            <Routes>
-              <Route path="/login" element={<Login />} />
+    <Router>
+      <Providers>
+        <Suspense fallback={<Spinner />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-              <Route
-                path="/student/*"
-                element={
-                  <ProtectedRoute allowedRoles={['Student']}>
-                    <StudentDashboard />
-                  </ProtectedRoute>
-                }
-              />
+            <Route
+              path="/student/*"
+              element={
+                <ProtectedRoute allowedRoles={['Student']}>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/staff/*"
-                element={
-                  <ProtectedRoute allowedRoles={['Staff']}>
-                    <StaffDashboard />
-                  </ProtectedRoute>
-                }
-              />
+            <Route
+              path="/staff/*"
+              element={
+                <ProtectedRoute allowedRoles={['Staff']}>
+                  <StaffDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/admin/*"
-                element={
-                  <ProtectedRoute allowedRoles={['Admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
+            <Route
+              path="/admin/*"
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-              <Route path="/unauthorized" element={<div>Unauthorized</div>} />
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AuthProvider>
-      </Router>
-    </ThemeProvider>
+            <Route path="/unauthorized" element={<div>Unauthorized</div>} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </Providers>
+    </Router>
   );
 }
 

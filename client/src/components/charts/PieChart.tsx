@@ -7,7 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface PieChartProps {
   data: Array<{

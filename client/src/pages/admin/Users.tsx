@@ -6,13 +6,41 @@ import Table from '../../components/ui/Table';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { PlusCircle, Edit, Trash, Eye } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Mock data
 const mockUsers = [
-  { id: 1, email: 'john.doe@school.com', role: 'Student', firstName: 'John', lastName: 'Doe', studentId: 'STU001' },
-  { id: 2, email: 'jane.smith@school.com', role: 'Student', firstName: 'Jane', lastName: 'Smith', studentId: 'STU002' },
-  { id: 3, email: 'prof.johnson@school.com', role: 'Staff', firstName: 'Robert', lastName: 'Johnson', staffId: 'STAFF001' },
-  { id: 4, email: 'admin@school.com', role: 'Admin', firstName: 'Admin', lastName: 'User' },
+  {
+    id: 1,
+    email: 'john.doe@school.com',
+    role: 'Student',
+    firstName: 'John',
+    lastName: 'Doe',
+    studentId: 'STU001',
+  },
+  {
+    id: 2,
+    email: 'jane.smith@school.com',
+    role: 'Student',
+    firstName: 'Jane',
+    lastName: 'Smith',
+    studentId: 'STU002',
+  },
+  {
+    id: 3,
+    email: 'prof.johnson@school.com',
+    role: 'Staff',
+    firstName: 'Robert',
+    lastName: 'Johnson',
+    staffId: 'STAFF001',
+  },
+  {
+    id: 4,
+    email: 'admin@school.com',
+    role: 'Admin',
+    firstName: 'Admin',
+    lastName: 'User',
+  },
 ];
 
 const UsersList = () => {
@@ -30,7 +58,7 @@ const UsersList = () => {
       header: 'Actions',
       accessor: (user) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -39,7 +67,7 @@ const UsersList = () => {
           >
             <Eye size={16} />
           </button>
-          <button 
+          <button
             className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -48,12 +76,12 @@ const UsersList = () => {
           >
             <Edit size={16} />
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
             onClick={(e) => {
               e.stopPropagation();
               // Show delete confirmation (not implemented in this demo)
-              alert(`Delete user ${user.id}`);
+              toast.success(`Delete user ${user.id}`);
             }}
           >
             <Trash size={16} />
@@ -65,12 +93,12 @@ const UsersList = () => {
 
   return (
     <div className="px-4 py-6">
-      <PageHeader 
-        title="User Management" 
+      <PageHeader
+        title="User Management"
         subtitle="View and manage all users"
         actions={
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             leftIcon={<PlusCircle size={16} />}
             onClick={() => navigate('/admin/users/add')}
           >
@@ -78,7 +106,7 @@ const UsersList = () => {
           </Button>
         }
       />
-      
+
       <Card>
         <Table
           columns={columns}

@@ -5,14 +5,45 @@ import Table from '../../components/ui/Table';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { PlusCircle, Edit, Trash, Eye } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Mock data
 const mockCourses = [
-  { id: 1, name: 'Introduction to Computer Science', code: 'CS101', credits: 3, lecturer: 'Prof. Johnson' },
-  { id: 2, name: 'Advanced Mathematics', code: 'MATH201', credits: 4, lecturer: 'Dr. Smith' },
-  { id: 3, name: 'English Literature', code: 'ENG101', credits: 3, lecturer: 'Prof. Williams' },
-  { id: 4, name: 'Physics I', code: 'PHYS101', credits: 4, lecturer: 'Dr. Brown' },
-  { id: 5, name: 'Database Systems', code: 'CS301', credits: 3, lecturer: 'Prof. Davis' },
+  {
+    id: 1,
+    name: 'Introduction to Computer Science',
+    code: 'CS101',
+    credits: 3,
+    lecturer: 'Prof. Johnson',
+  },
+  {
+    id: 2,
+    name: 'Advanced Mathematics',
+    code: 'MATH201',
+    credits: 4,
+    lecturer: 'Dr. Smith',
+  },
+  {
+    id: 3,
+    name: 'English Literature',
+    code: 'ENG101',
+    credits: 3,
+    lecturer: 'Prof. Williams',
+  },
+  {
+    id: 4,
+    name: 'Physics I',
+    code: 'PHYS101',
+    credits: 4,
+    lecturer: 'Dr. Brown',
+  },
+  {
+    id: 5,
+    name: 'Database Systems',
+    code: 'CS301',
+    credits: 3,
+    lecturer: 'Prof. Davis',
+  },
 ];
 
 const CoursesList = () => {
@@ -29,7 +60,7 @@ const CoursesList = () => {
       header: 'Actions',
       accessor: (course) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -38,7 +69,7 @@ const CoursesList = () => {
           >
             <Eye size={16} />
           </button>
-          <button 
+          <button
             className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -47,12 +78,12 @@ const CoursesList = () => {
           >
             <Edit size={16} />
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
             onClick={(e) => {
               e.stopPropagation();
               // Show delete confirmation (not implemented in this demo)
-              alert(`Delete course ${course.id}`);
+              toast.success(`Delete course ${course.id}`);
             }}
           >
             <Trash size={16} />
@@ -64,12 +95,12 @@ const CoursesList = () => {
 
   return (
     <div className="px-4 py-6">
-      <PageHeader 
-        title="Course Management" 
+      <PageHeader
+        title="Course Management"
         subtitle="View and manage all courses"
         actions={
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             leftIcon={<PlusCircle size={16} />}
             onClick={() => navigate('/admin/courses/add')}
           >
@@ -77,7 +108,7 @@ const CoursesList = () => {
           </Button>
         }
       />
-      
+
       <Card>
         <Table
           columns={columns}
