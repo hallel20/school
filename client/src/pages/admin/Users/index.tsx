@@ -11,8 +11,6 @@ import { User } from '../../../types';
 import { getUserName } from '../../../utils';
 import { useState } from 'react';
 import { lazy } from 'react';
-import EditUser from './edit';
-import ViewUser from './view';
 import Pagination from '../../../components/ui/pagination';
 import { useDeleteConfirmation } from '../../../hooks/useDeleteConfirmation';
 import api from '../../../services/api';
@@ -26,6 +24,8 @@ interface UsersResponse {
 }
 
 const AddUser = lazy(() => import('./create'));
+const EditUser = lazy(() => import('./edit'));
+const ViewUser = lazy(() => import('./view'));
 
 const UsersList = () => {
   const navigate = useNavigate();
