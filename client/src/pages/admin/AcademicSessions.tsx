@@ -38,7 +38,7 @@ const SessionsList = () => {
     { header: 'Name', accessor: 'name' },
     {
       header: 'Current',
-      accessor: (session) => (
+      accessor: (session: any) => (
         <div className="flex justify-center">
           {session.current && <Check size={18} className="text-green-500" />}
         </div>
@@ -47,11 +47,11 @@ const SessionsList = () => {
     },
     {
       header: 'Semesters',
-      accessor: (session) => session.semesters.join(', '),
+      accessor: (session: any) => session.semesters.join(', '),
     },
     {
       header: 'Actions',
-      accessor: (session) => (
+      accessor: (session: any) => (
         <div className="flex space-x-2">
           <button
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -108,7 +108,7 @@ const SessionsList = () => {
           data={sessions}
           keyField="id"
           isLoading={isLoading}
-          onRowClick={(session) =>
+          onRowClick={(session: any) =>
             navigate(`/admin/academic-sessions/view/${session.id}`)
           }
         />
