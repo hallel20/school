@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { verifyToken, hasRole } from '../middleware/auth';
+import { padToTenThousands } from '../utils';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -15,15 +16,38 @@ const userValidation = [
 ];
 
 // Get all users - Admin only
-router.get('/', verifyToken, hasRole('Admin'), async (_req: Request, res: Response) => {
+router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Response) => {
   try {
+    const { page = 1, pageSize = 20, role } = req.query;
+    const pageNumber = Number(page);
+    const pageSizeNumber = Number(pageSize);
+    const where: any = {};
+
+    if (role) {
+      where.role = role as string;
+    }
+
     const users = await prisma.user.findMany({
+      where,
       include: {
         student: true,
         staff: true
-      }
+      },
+      take: pageSizeNumber,
+      skip: (pageNumber - 1) * pageSizeNumber,
     });
-    res.json(users);
+    const allUsersCount = await prisma.user.count();
+    const totalPages = Math.ceil(allUsersCount / pageSizeNumber);
+
+    const response = {
+      users,
+      page: pageNumber,
+      pageSize: pageSizeNumber,
+      totalPages,
+      totalUsers: allUsersCount,
+    };
+
+    res.json(response);
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: 'Server error' });
@@ -43,7 +67,10 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.json({
+      ...user,
+      password: undefined, // Exclude password from response
+    });
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: 'Server error' });
@@ -54,9 +81,20 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Request, res: Response) => {
   try {
     const { email, password, role, firstName, lastName } = req.body;
-    
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Get the next available ID for student or staff
+    const nextUserIds = await prisma.nextId.findMany()
+    const nextStudent = nextUserIds.find((user) => user.tableName === 'student')?.nextId || 1;
+    const nextStaff = nextUserIds.find((user) => user.tableName === 'staff')?.nextId || 1;
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -67,7 +105,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
             create: {
               firstName,
               lastName,
-              studentId: `STU${Date.now()}`
+              studentId: `STU${padToTenThousands(nextStudent)}`
             }
           }
         }),
@@ -76,7 +114,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
             create: {
               firstName,
               lastName,
-              staffId: `STAFF${Date.now()}`
+              staffId: `STAFF${padToTenThousands(nextStaff)}`
             }
           }
         })
@@ -86,6 +124,20 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
         staff: true
       }
     });
+
+    // Update the next available ID for the user
+    if (role === 'Student') {
+      await prisma.nextId.update({
+        where: { tableName: 'student' },
+        data: { nextId: nextStudent + 1 }
+      });
+    }
+    if (role === 'Staff') {
+      await prisma.nextId.update({
+        where: { tableName: 'staff' },
+        data: { nextId: nextStaff + 1 }
+      });
+    }
 
     res.status(201).json(user);
   } catch (error) {
@@ -98,7 +150,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
 router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
     const { email, role, firstName, lastName } = req.body;
-    
+
     const user = await prisma.user.update({
       where: { id: parseInt(req.params.id) },
       data: {
@@ -146,5 +198,6 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 export default router;

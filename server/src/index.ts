@@ -7,6 +7,8 @@ import courseRoutes from './routes/courses';
 import resultRoutes from './routes/results';
 import academicRoutes from './routes/academic';
 import settingsRoutes from './routes/settings';
+import logRoutes from './routes/logs';
+import adminRoutes from './routes/admin';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import fs from 'fs';
@@ -53,12 +55,14 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/academic', academicRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/logs', logRoutes);
+app.use('/api/admin', adminRoutes)
 
 const PORT = process.env.PORT || 5000;
 
 if (env === 'development') {
   app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
 } else {
   const options = {

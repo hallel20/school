@@ -97,3 +97,39 @@ export const isCourseLecturer = async (req: RequestWithUser, res: Response, next
 
   next();
 };
+
+export const verifyAdmin = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (req.user.role !== 'Admin') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  next();
+}
+
+export const verifyStaff = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (req.user.role !== 'Staff') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  next();
+}
+
+export const verifyStudent = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (req.user.role !== 'Student') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  next();
+}
