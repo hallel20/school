@@ -19,6 +19,8 @@ model User {
   staff         Staff?         @relation(fields: [staffId], references: [id])
   staffId       Int?           @unique
   notifications Notification[]
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
 }
 
 model Student {
