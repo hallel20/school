@@ -14,6 +14,8 @@ import { lazy } from 'react';
 import EditUser from './edit';
 import ViewUser from './view';
 import Pagination from '../../../components/ui/pagination';
+import { useDeleteConfirmation } from '../../../hooks/useDeleteConfirmation';
+import api from '../../../services/api';
 
 interface UsersResponse {
   users: User[];
@@ -35,11 +37,16 @@ const UsersList = () => {
 
   const [roleFilter, setRoleFilter] = useState('');
   const [pageSize, setPageSize] = useState(pageSizeNumber);
-  
 
-  const { data, loading: isLoading } = useFetch<UsersResponse>(
+  const {
+    data,
+    loading: isLoading,
+    refetch,
+  } = useFetch<UsersResponse>(
     `/users?role=${roleFilter}&page=${pageNumber}&pageSize=${pageSizeNumber}`
   );
+
+  const { openDeleteConfirmation, DeleteModal } = useDeleteConfirmation();
 
   const { users, totalPages } = data || {
     users: [],
@@ -50,7 +57,9 @@ const UsersList = () => {
   };
 
   const handlePageChange = (page: number) => {
-    navigate(`/admin/users?role=${roleFilter}&page=${page}&pageSize=${pageSize}`);
+    navigate(
+      `/admin/users?role=${roleFilter}&page=${page}&pageSize=${pageSize}`
+    );
   };
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
@@ -59,12 +68,18 @@ const UsersList = () => {
   const handleRoleFilterChange = (role: string) => {
     setRoleFilter(role);
     navigate(`/admin/users?role=${role}&page=1&pageSize=${pageSize}`);
-  }
+  };
 
   const columns = [
     { header: 'ID', accessor: 'id' },
-    { header: 'First Name', accessor: (user: User) => getUserName(user, "firstName") },
-    { header: 'Last Name', accessor: (user: User) => getUserName(user, "lastName") },
+    {
+      header: 'First Name',
+      accessor: (user: User) => getUserName(user, 'firstName'),
+    },
+    {
+      header: 'Last Name',
+      accessor: (user: User) => getUserName(user, 'lastName'),
+    },
     { header: 'Email', accessor: 'email' },
     { header: 'Role', accessor: 'role' },
     {
@@ -93,8 +108,14 @@ const UsersList = () => {
             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
             onClick={(e) => {
               e.stopPropagation();
-              // Show delete confirmation (not implemented in this demo)
-              toast.success(`Delete user ${user.id}`);
+              openDeleteConfirmation(`user ${user.email}`, async () => {
+                await toast.promise(api.delete(`/users/${user.id}`), {
+                  loading: 'Deleting...',
+                  success: `Deleted user ${user.email}`,
+                  error: `Failed to delete user ${user.email}`,
+                });
+                refetch();
+              });
             }}
           >
             <Trash size={16} />
@@ -162,6 +183,7 @@ const UsersList = () => {
             totalPages={totalPages}
           />
         </Card>
+        <DeleteModal />
       </div>
     </div>
   );
