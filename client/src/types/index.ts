@@ -25,3 +25,12 @@ export type Staff = {
     lastName: string;
     userId: number | null;
 }
+
+export type Course = {
+    id: number;
+    name: string;
+    code: string;
+    credits: number;
+    students: Student[];
+    lecturer: Staff;
+};

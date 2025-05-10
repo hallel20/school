@@ -158,94 +158,97 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
         Add New User
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Email Address
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...register('email')}
-            className={`mt-1 block w-full px-3 py-2 border ${
-              errors.email
-                ? 'border-red-500'
-                : 'border-gray-300 dark:border-gray-600'
-            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
-          />
-          {errors.email && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
+        {/* Grid for Email, Password, and Role */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              {...register('email')}
+              className={`mt-1 block w-full px-3 py-2 border ${
+                errors.email
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
+            />
+            {errors.email && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register('password')}
-            className={`mt-1 block w-full px-3 py-2 border ${
-              errors.password
-                ? 'border-red-500'
-                : 'border-gray-300 dark:border-gray-600'
-            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
-          />
-          {errors.password && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              {...register('password')}
+              className={`mt-1 block w-full px-3 py-2 border ${
+                errors.password
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
+            />
+            {errors.password && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
 
-        <div>
-          <label
-            htmlFor="role"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Role
-          </label>
-          <select
-            id="role"
-            {...register('role')}
-            className={`mt-1 block w-full px-3 py-2 border ${
-              errors.role
-                ? 'border-red-500'
-                : 'border-gray-300 dark:border-gray-600'
-            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
-          >
-            <option value="Student">Student</option>
-            <option value="Staff">Staff</option>
-            <option value="Admin">Admin</option>
-          </select>
-          {errors.role && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-              {errors.role.message}
-            </p>
-          )}
+          <div className="md:col-span-2">
+            {' '}
+            {/* Role spans full width on medium screens */}
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Role
+            </label>
+            <select
+              id="role"
+              {...register('role')}
+              className={`mt-1 block w-full px-3 py-2 border ${
+                errors.role
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
+            >
+              <option value="Student">Student</option>
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
+            {errors.role && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {errors.role.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Conditional First Name and Last Name fields */}
         <div
           className={`overflow-hidden transition-all duration-500 ease-in-out ${
             watchedRole === 'Student' || watchedRole === 'Staff'
-              ? 'max-h-96 opacity-100' // Adjust max-h if more space is needed (e.g., max-h-[20rem] or more)
+              ? 'max-h-96 opacity-100' // max-h should be enough for one row of fields
               : 'max-h-0 opacity-0'
           }`}
           aria-hidden={!(watchedRole === 'Student' || watchedRole === 'Staff')}
         >
-          {/* This inner div ensures that when visible, its children have spacing */}
           {(watchedRole === 'Student' || watchedRole === 'Staff') && (
-            <div className="space-y-6 pt-6">
-              {' '}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
               {/* pt-6 to add space from the Role field when these appear */}
               <div>
                 <label
