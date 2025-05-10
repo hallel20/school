@@ -2,13 +2,13 @@ import { ReactNode } from 'react';
 
 export interface Column<T> {
   header: string;
-  accessor: keyof T | ((row: T) => ReactNode);
+  accessor: keyof T | ((row: T) => ReactNode) | string;
   className?: string;
 }
 
 interface TableProps<T> {
   columns: Column<T>[];
-  data: T[];
+  data: T[] | undefined;
   keyField: keyof T;
   isLoading?: boolean;
   emptyMessage?: string;
@@ -29,9 +29,14 @@ function Table<T>({
   const getCellValue = (row: T, accessor: Column<T>['accessor']) => {
     if (typeof accessor === 'function') {
       return accessor(row);
+    } else if (typeof accessor === 'string') {
+      return row[accessor as keyof T];
     }
+    // If accessor is a key, return the value directly
     return row[accessor];
   };
+
+  data = typeof data === 'undefined' ? [] : data;
 
   return (
     <div className={`w-full overflow-x-auto ${className}`}>
@@ -53,7 +58,7 @@ function Table<T>({
           {isLoading ? (
             <tr>
               <td colSpan={columns.length} className="px-6 py-4 text-center">
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center min-h-72 justify-center space-x-2">
                   <svg
                     className="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400"
                     xmlns="http://www.w3.org/2000/svg"
