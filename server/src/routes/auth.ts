@@ -33,7 +33,7 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
     }
 
     if (!user || !await bcrypt.compare(password, user.password)) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).send({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
@@ -42,10 +42,10 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
       { expiresIn: '24h' }
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    res.send({ token, user: { id: user.id, email: user.email, role: user.role } });
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -60,10 +60,10 @@ router.get('/me', verifyToken, async (req: RequestWithUser, res: Response) => {
       }
     });
 
-    res.json(user);
+    res.send(user);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 

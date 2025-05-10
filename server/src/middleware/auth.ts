@@ -15,7 +15,7 @@ export const verifyToken = async (req: RequestWithUser, res: Response, next: Nex
     // console.log(token)
 
     if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).send({ message: 'No token provided' });
     }
 
     const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -34,14 +34,14 @@ export const verifyToken = async (req: RequestWithUser, res: Response, next: Nex
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid token' });
+      return res.status(401).send({ message: 'Invalid token' });
     }
 
     req.user = user;
     next();
   } catch (error) {
     console.log(error)
-    return res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).send({ message: 'Invalid token' });
   }
 };
 
@@ -49,11 +49,11 @@ export const verifyToken = async (req: RequestWithUser, res: Response, next: Nex
 export const hasRole = (...roles: string[]) => {
   return (req: RequestWithUser, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).send({ message: 'Unauthorized' });
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Forbidden' });
+      return res.status(403).send({ message: 'Forbidden' });
     }
 
     next();
@@ -69,11 +69,11 @@ export const isOwnResource = async (req: RequestWithUser, res: Response, next: N
   const resourceId = parseInt(req.params.id);
 
   if (req.user?.role === 'Student' && req.user.studentId !== resourceId) {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).send({ message: 'Forbidden' });
   }
 
   if (req.user?.role === 'Staff' && req.user.staffId !== resourceId) {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).send({ message: 'Forbidden' });
   }
 
   next();
@@ -92,7 +92,7 @@ export const isCourseLecturer = async (req: RequestWithUser, res: Response, next
   });
 
   if (!course || course.lecturerId !== req.user?.staffId) {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).send({ message: 'Forbidden' });
   }
 
   next();
@@ -100,11 +100,11 @@ export const isCourseLecturer = async (req: RequestWithUser, res: Response, next
 
 export const verifyAdmin = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).send({ message: 'Unauthorized' });
   }
 
   if (req.user.role !== 'Admin') {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).send({ message: 'Forbidden' });
   }
 
   next();
@@ -112,11 +112,11 @@ export const verifyAdmin = async (req: RequestWithUser, res: Response, next: Nex
 
 export const verifyStaff = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).send({ message: 'Unauthorized' });
   }
 
   if (req.user.role !== 'Staff') {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).send({ message: 'Forbidden' });
   }
 
   next();
@@ -124,11 +124,11 @@ export const verifyStaff = async (req: RequestWithUser, res: Response, next: Nex
 
 export const verifyStudent = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).send({ message: 'Unauthorized' });
   }
 
   if (req.user.role !== 'Student') {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).send({ message: 'Forbidden' });
   }
 
   next();

@@ -22,10 +22,10 @@ router.get('/', verifyToken, async (_req, res) => {
         students: true
       }
     });
-    res.json(courses);
+    res.send(courses);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -40,12 +40,12 @@ router.get('/:id', verifyToken, async (req, res) => {
       }
     });
     if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+      return res.status(404).send({ message: 'Course not found' });
     }
-    res.json(course);
+    res.send(course);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -66,10 +66,10 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
       }
     });
 
-    res.status(201).json(course);
+    res.status(201).send(course);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -91,10 +91,10 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
       }
     });
 
-    res.json(course);
+    res.send(course);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -107,7 +107,7 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -125,10 +125,10 @@ router.post('/:id/register', verifyToken, hasRole('Student'), async (req: Reques
         }
       }
     });
-    res.json(course);
+    res.send(course);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -143,10 +143,10 @@ router.get('/:id/students', verifyToken, hasRole('Staff'), isCourseLecturer, asy
     });
     const students = course?.students || [];
 
-    res.json(students);
+    res.send(students);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 

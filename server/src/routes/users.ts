@@ -49,10 +49,10 @@ router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Respons
       totalUsers: allUsersCount,
     };
 
-    res.json(response);
+    res.send(response);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -67,15 +67,15 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
       }
     });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).send({ message: 'User not found' });
     }
-    res.json({
+    res.send({
       ...user,
       password: undefined, // Exclude password from response
     });
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -88,7 +88,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
       where: { email }
     });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).send({ message: 'User already exists' });
     }
 
     // Get the next available ID for student or staff
@@ -141,10 +141,10 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
       });
     }
 
-    res.status(201).json(user);
+    res.status(201).send(user);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -181,10 +181,10 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
       }
     });
 
-    res.json(user);
+    res.send(user);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -198,7 +198,7 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 

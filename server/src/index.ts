@@ -15,6 +15,7 @@ import fs from 'fs';
 import https from 'https';
 
 import { PrismaClient } from '@prisma/client';
+import { logger } from './middleware/logger';
 
 const prisma = new PrismaClient();
 
@@ -45,6 +46,7 @@ const corsOptions = {
 // Middleware
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
 

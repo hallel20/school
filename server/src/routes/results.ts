@@ -17,7 +17,7 @@ router.get('/student/:studentId', verifyToken, async (req: RequestWithUser, res:
   try {
     // Students can only view their own results
     if (req.user?.role === 'Student' && req.user.studentId !== parseInt(req.params.studentId)) {
-      return res.status(403).json({ message: 'Forbidden' });
+      return res.status(403).send({ message: 'Forbidden' });
     }
 
     const results = await prisma.result.findMany({
@@ -28,10 +28,10 @@ router.get('/student/:studentId', verifyToken, async (req: RequestWithUser, res:
         semester: true
       }
     });
-    res.json(results);
+    res.send(results);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -46,10 +46,10 @@ router.get('/course/:courseId', verifyToken, hasRole('Staff'), isCourseLecturer,
         semester: true
       }
     });
-    res.json(results);
+    res.send(results);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -92,10 +92,10 @@ router.post('/course/:courseId/student/:studentId',
         }
       });
 
-      res.json(result);
+      res.send(result);
     } catch (error) {
       console.log(error)
-      res.status(500).json({ message: 'Server error' });
+      res.status(500).send({ message: 'Server error' });
     }
   });
 
@@ -108,7 +108,7 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 

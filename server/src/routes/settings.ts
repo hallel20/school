@@ -22,10 +22,10 @@ router.get('/', verifyToken, async (_req: Request, res: Response) => {
         currentAcademicSession: true
       }
     });
-    res.json(settings);
+    res.send(settings);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -53,10 +53,10 @@ router.put('/', verifyToken, hasRole('Admin'), settingsValidation, async (req: R
       }
     });
 
-    res.json(settings);
+    res.send(settings);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 

@@ -35,7 +35,7 @@ export const getLogs = async (req: Request, res: Response) => {
         const totalLogs = await prisma.log.count();
         const totalPages = Math.ceil(totalLogs / limit);
 
-        res.status(200).json({
+        res.status(200).send({
             data: logs,
             meta: {
                 currentPage: page,
@@ -45,7 +45,7 @@ export const getLogs = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error("Error fetching logs:", error);
-        res.status(500).json({ error: "Failed to fetch logs" });
+        res.status(500).send({ error: "Failed to fetch logs" });
     }
 };
 
@@ -63,9 +63,9 @@ export const createLog = async (req: Request, res: Response) => {
             },
         });
 
-        res.status(201).json(log);
+        res.status(201).send(log);
     } catch (error) {
         console.error("Error creating log:", error);
-        res.status(500).json({ error: "Failed to create log" });
+        res.status(500).send({ error: "Failed to create log" });
     }
 };

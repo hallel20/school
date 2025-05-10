@@ -25,10 +25,10 @@ router.get('/sessions', verifyToken, async (_req, res) => {
         semesters: true
       }
     });
-    res.json(sessions);
+    res.send(sessions);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -42,12 +42,12 @@ router.get('/sessions/:id', verifyToken, async (req, res) => {
       }
     });
     if (!session) {
-      return res.status(404).json({ message: 'Academic session not found' });
+      return res.status(404).send({ message: 'Academic session not found' });
     }
-    res.json(session);
+    res.send(session);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -63,10 +63,10 @@ router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async
       }
     });
 
-    res.status(201).json(session);
+    res.status(201).send(session);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -83,10 +83,10 @@ router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, as
       }
     });
 
-    res.json(session);
+    res.send(session);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -99,7 +99,7 @@ router.delete('/sessions/:id', verifyToken, hasRole('Admin'), async (req, res) =
     res.status(204).send();
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -111,10 +111,10 @@ router.get('/semesters', verifyToken, async (_req, res) => {
         academicSession: true
       }
     });
-    res.json(semesters);
+    res.send(semesters);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -128,12 +128,12 @@ router.get('/semesters/:id', verifyToken, async (req, res) => {
       }
     });
     if (!semester) {
-      return res.status(404).json({ message: 'Semester not found' });
+      return res.status(404).send({ message: 'Semester not found' });
     }
-    res.json(semester);
+    res.send(semester);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -152,10 +152,10 @@ router.post('/semesters', verifyToken, hasRole('Admin'), semesterValidation, asy
       }
     });
 
-    res.status(201).json(semester);
+    res.status(201).send(semester);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -175,10 +175,10 @@ router.put('/semesters/:id', verifyToken, hasRole('Admin'), semesterValidation, 
       }
     });
 
-    res.json(semester);
+    res.send(semester);
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
@@ -191,7 +191,7 @@ router.delete('/semesters/:id', verifyToken, hasRole('Admin'), async (req, res) 
     res.status(204).send();
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send({ message: 'Server error' });
   }
 });
 
