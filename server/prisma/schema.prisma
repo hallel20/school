@@ -10,25 +10,26 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      String // "Student", "Staff", "Admin"
-  student   Student? @relation(fields: [studentId], references: [id])
-  studentId Int?     @unique
-  staff     Staff?   @relation(fields: [staffId], references: [id])
-  staffId   Int?     @unique
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String
+  role          String // "Student", "Staff", "Admin"
+  student       Student?       @relation(fields: [studentId], references: [id])
+  studentId     Int?           @unique
+  staff         Staff?         @relation(fields: [staffId], references: [id])
+  staffId       Int?           @unique
+  notifications Notification[]
 }
 
 model Student {
-  id         Int      @id @default(autoincrement())
-  user       User?
-  userId     Int?     @unique
-  studentId  String   @unique // Unique student identifier
-  firstName  String
-  lastName   String
-  courses    Course[] @relation("StudentCourses")
-  results    Result[]
+  id        Int      @id @default(autoincrement())
+  user      User?
+  userId    Int?     @unique
+  studentId String   @unique // Unique student identifier
+  firstName String
+  lastName  String
+  courses   Course[] @relation("StudentCourses")
+  results   Result[]
 }
 
 model Staff {
@@ -53,14 +54,14 @@ model Course {
 }
 
 model Result {
-  id                Int            @id @default(autoincrement())
-  student           Student        @relation(fields: [studentId], references: [id])
+  id                Int             @id @default(autoincrement())
+  student           Student         @relation(fields: [studentId], references: [id])
   studentId         Int
-  course            Course         @relation(fields: [courseId], references: [id])
+  course            Course          @relation(fields: [courseId], references: [id])
   courseId          Int
   academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
   academicSessionId Int
-  semester          Semester       @relation(fields: [semesterId], references: [id])
+  semester          Semester        @relation(fields: [semesterId], references: [id])
   semesterId        Int
   score             Float
   grade             String?
@@ -69,28 +70,54 @@ model Result {
 }
 
 model AcademicSession {
-  id               Int              @id @default(autoincrement())
-  name             String           @unique // e.g., "2024/2025"
-  semesters        Semester[]
-  results          Result[]
-  schoolSetting    SchoolSetting?
+  id            Int            @id @default(autoincrement())
+  name          String         @unique // e.g., "2024/2025"
+  semesters     Semester[]
+  results       Result[]
+  schoolSetting SchoolSetting?
 }
 
 model Semester {
-  id                 Int              @id @default(autoincrement())
-  name               String           // e.g., "First Semester", "Second Semester"
-  academicSession    AcademicSession  @relation(fields: [academicSessionId], references: [id])
-  academicSessionId  Int
-  results            Result[]
+  id                Int             @id @default(autoincrement())
+  name              String // e.g., "First Semester", "Second Semester"
+  academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
+  academicSessionId Int
+  results           Result[]
 
   @@unique([academicSessionId, name])
 }
 
 model SchoolSetting {
-  id                      Int               @id @default(autoincrement())
-  name                    String
-  address                 String
-  currentAcademicSessionId Int?              @unique
-  currentAcademicSession  AcademicSession?  @relation(fields: [currentAcademicSessionId], references: [id])
-  semestersPerSession     Int               @default(2)
+  id                       Int              @id @default(autoincrement())
+  name                     String
+  address                  String
+  currentAcademicSessionId Int?             @unique
+  currentAcademicSession   AcademicSession? @relation(fields: [currentAcademicSessionId], references: [id])
+  semestersPerSession      Int              @default(2)
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Log {
+  id        Int         @id @default(autoincrement())
+  origin    ErrorOrigin
+  details   String?
+  ipAddress String?
+  userAgent String?
+  status    String? // e.g., "Success", "Failure"
+  error     String? // Error message if any
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+enum ErrorOrigin {
+  client
+  server
 }
