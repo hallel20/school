@@ -7,7 +7,7 @@ set -u
 # Pipelines return the exit status of the last command to fail, or zero if all commands in the pipeline exit successfully.
 set -o pipefail
 
-REPOSITORY_PATH="/school"
+REPOSITORY_PATH="school"
 BRANCH="main" # Or your main branch name
 
 cd "$REPOSITORY_PATH" || exit 1
