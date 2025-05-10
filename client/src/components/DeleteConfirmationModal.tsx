@@ -4,15 +4,17 @@ import * as Dialog from '@radix-ui/react-dialog';
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  itemName: string;
-  onDelete: () => void;
+  title: string;
+  message: string;
+  onConfirm: () => void;
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   isOpen,
   onClose,
-  itemName,
-  onDelete,
+  title,
+  message,
+  onConfirm,
 }) => {
   // Radix Dialog's open state is controlled by its `open` prop,
   // and changes are communicated via `onOpenChange`.
@@ -28,10 +30,10 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           dark:bg-gray-800"
         >
           <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Delete Confirmation
+            {title}
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Are you sure you want to delete "{itemName}"?
+            {message}
             {/* This action cannot be undone. */}
           </Dialog.Description>
 
@@ -50,7 +52,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             </Dialog.Close>
             <button
               type="button"
-              onClick={onDelete}
+              onClick={onConfirm}
               className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white
                          hover:bg-red-700 focus:outline-none focus-visible:ring-2
                          focus-visible:ring-red-500 focus-visible:ring-offset-2
