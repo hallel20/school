@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import PageHeader from '../../../components/ui/PageHeader';
 import Table from '../../../components/ui/Table';
 import Button from '../../../components/ui/Button';
@@ -12,6 +12,7 @@ import { useState } from 'react';
 import ViewCourse from '../../../components/modals/ViewCourse';
 import { useDeleteConfirmation } from '../../../hooks/useDeleteConfirmation';
 import api from '../../../services/api';
+import Select from '../../../components/ui/Select';
 
 interface CourseResponse {
   courses: Course[];
@@ -22,6 +23,15 @@ interface CourseResponse {
 }
 
 const CoursesList = () => {
+  const navigate = useNavigate();
+  const searchParams = useSearchParams();
+  const page = searchParams[0].get('page') || '1';
+  const pageNumber = parseInt(page, 10);
+  const pageSizeParam = searchParams[0].get('pageSize') || '10';
+  const pageSizeNumber = parseInt(pageSizeParam, 10);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [open, setOpen] = useState(false);
+  const [pageSize, setPageSize] = useState(pageSizeNumber);
   const {
     data: { courses, totalPages } = {
       courses: [],
@@ -29,11 +39,18 @@ const CoursesList = () => {
     },
     loading: isLoading,
     refetch,
-  } = useFetch<CourseResponse>('/courses'); // Custom hook to fetch courses
-  const navigate = useNavigate();
-  const [course, setCourse] = useState<Course | null>(null);
-  const [open, setOpen] = useState(false);
+  } = useFetch<CourseResponse>(
+    `/courses?page=${pageNumber}&pageSize=${pageSizeNumber}`
+  ); // Custom hook to fetch courses
   const { openDeleteConfirmation, DeleteModal } = useDeleteConfirmation();
+
+  const handlePageChange = (page: number) => {
+    navigate(`/admin/users?page=${page}&pageSize=${pageSize}`);
+  };
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    navigate(`/admin/users?page=${page}&pageSize=${size}`);
+  };
 
   const columns = [
     { header: 'Code', accessor: 'code' },
@@ -114,6 +131,20 @@ const CoursesList = () => {
         />
 
         <Card>
+          <div className="flex justify-end items-center gap-2">
+            <Select
+              label="Page Size"
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              options={[
+                { label: '5', value: 5 },
+                { label: '10', value: 10 },
+                { label: '20', value: 20 },
+                { label: '50', value: 50 },
+                { label: '100', value: 100 },
+              ]}
+            />
+          </div>
           <Table
             columns={columns}
             data={courses}
@@ -125,10 +156,7 @@ const CoursesList = () => {
         <Pagination
           totalPages={totalPages}
           currentPage={1}
-          onPageChange={(page) => {
-            // Handle page change (not implemented in this demo)
-            toast.success(`Page changed to ${page}`);
-          }}
+          onPageChange={handlePageChange}
         />
       </div>
       {open && course && (

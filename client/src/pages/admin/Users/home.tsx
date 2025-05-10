@@ -58,11 +58,11 @@ const UsersList = () => {
   };
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    navigate(`/admin/users?role=${roleFilter}page=1&pageSize=${size}`);
+    navigate(`/admin/users?role=${roleFilter}&page=${page}&pageSize=${size}`);
   };
   const handleRoleFilterChange = (role: string) => {
     setRoleFilter(role);
-    navigate(`/admin/users?role=${role}&page=1&pageSize=${pageSize}`);
+    navigate(`/admin/users?role=${role}&page=${page}&pageSize=${pageSize}`);
   };
 
   const columns = [
