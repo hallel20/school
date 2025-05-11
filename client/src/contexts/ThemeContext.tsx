@@ -14,7 +14,6 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  // Get theme from localStorage or default to light
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme as Theme) || 'light';
@@ -37,6 +36,20 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
+
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem('theme') as Theme;
+
+  //   if (savedTheme) {
+  //     setTheme(savedTheme); // Use the theme from localStorage if available.
+  //   } else {
+  //     // Otherwise, use the system preference.
+  //     const prefersDarkMode = window.matchMedia(
+  //       '(prefers-color-scheme: dark)'
+  //     ).matches;
+  //     setTheme(prefersDarkMode ? 'dark' : 'light');
+  //   }
+  // }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

@@ -1,6 +1,13 @@
+import { useTheme } from '../../hooks/useTheme';
+
 const Spinner = () => {
+  const { theme } = useTheme();
   return (
-    <div className="flex justify-center items-center h-screen w-full">
+    <div
+      className={`flex justify-center items-center h-screen w-full ${
+        theme === 'dark' ? 'bg-gray-900' : ''
+      }`}
+    >
       <svg
         className="animate-spin h-10 w-10 text-blue-600 dark:text-blue-400"
         xmlns="http://www.w3.org/2000/svg"
