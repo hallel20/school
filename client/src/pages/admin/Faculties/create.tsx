@@ -2,27 +2,27 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import PageHeader from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
-import CourseForm from '@/components/courses/form';
+import FacultyForm from '@/components/faculties/form';
 
-export default function AddCourse() {
+export default function CreateFaculty() {
   const navigate = useNavigate();
 
   return (
     <div className="px-4 py-6">
       <PageHeader
-        title="Add Course"
-        subtitle={`Add a new course`}
+        title="Create Faculty"
+        subtitle={`Create a new faculty`}
         actions={
           <Button
             variant="secondary"
-            onClick={() => navigate('/admin/courses')}
+            onClick={() => navigate('/admin/faculties')}
           >
-            Back to Courses
+            Back to Facultys
           </Button>
         }
       />
       <Card>
-        <CourseForm />
+        <FacultyForm />
       </Card>
     </div>
   );

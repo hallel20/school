@@ -1,11 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import Button from '../../../components/ui/Button';
-import PageHeader from '../../../components/ui/PageHeader';
-import UserForm from '../../../components/users/form';
-import Card from '../../../components/ui/Card';
-import { User } from '../../../types';
-import Spinner from '../../../components/ui/Spinner';
-import useFetch from '../../../hooks/useFetch';
+import Button from '@/components/ui/Button';
+import PageHeader from '@/components/ui/PageHeader';
+import UserForm from '@/components/users/form';
+import Card from '@/components/ui/Card';
+import { User } from '@/types';
+import Spinner from '@/components/ui/Spinner';
+import useFetch from '@/hooks/useFetch';
 import NotFound from '../../NotFound';
 
 export default function EditUser() {

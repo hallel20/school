@@ -3,7 +3,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
-function useFetch<T>(route: string) {
+function useFetch<T>(route: string | null) {
     const [data, setData] = useState<T | undefined>(); // State to store fetched data
     const [loading, setLoading] = useState(true); // State to track loading status
     const [error, setError] = useState<Error | null>(null); // State to handle errors
@@ -12,7 +12,7 @@ function useFetch<T>(route: string) {
         setLoading(true);
         setError(null);
         try {
-            const response = await api.get<T>(route);
+            const response = await api.get<T>(route as string);
             setData(response.data);
         } catch (err) {
             setError(err as Error);
@@ -40,7 +40,9 @@ function useFetch<T>(route: string) {
     };
 
     useEffect(() => {
-        fetchData();
+        if (route) {
+            fetchData();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [route]);
 

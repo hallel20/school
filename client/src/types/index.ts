@@ -1,5 +1,12 @@
 export type Role = 'Student' | 'Staff' | 'Admin';
 
+export enum StaffPosition {
+    lecturer = 'lecturer',
+    doctor = 'doctor',
+    assistant = 'assistant',
+    professor = 'professor',
+}
+
 export type User = {
     email: string;
     password: string;
@@ -17,12 +24,18 @@ export type Student = {
     firstName: string;
     lastName: string;
     userId: number | null;
+    departmentId: number | null;
+    department?: Department | null;
 };
 export type Staff = {
     id: number;
     staffId: string;
     firstName: string;
     lastName: string;
+    user?: User;
+    position: StaffPosition;
+    departmentId: number | null;
+    department?: Department | null;
     userId: number | null;
 }
 
@@ -34,3 +47,25 @@ export type Course = {
     students: Student[];
     lecturer: Staff;
 };
+
+export type Department = {
+    id: number;
+    name: string;
+    code: string;
+    hodId: number | null;
+    facultyId: number;
+    courses: Course[];
+    hod: Staff | null;
+    faculty: Faculty | null;
+    students?: Student[];
+    staff?: Staff[];
+};
+
+export type Faculty = {
+    id: number;
+    name: string;
+    code: string;
+    dean?: Staff;
+    deanId?: number | null;
+    departments: Department[];
+}

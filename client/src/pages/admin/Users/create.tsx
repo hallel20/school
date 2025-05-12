@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import Button from "../../../components/ui/Button";
-import PageHeader from "../../../components/ui/PageHeader";
-import UserForm from "../../../components/users/form";
-import Card from "../../../components/ui/Card";
+import Button from '@/components/ui/Button';
+import PageHeader from '@/components/ui/PageHeader';
+import UserForm from '@/components/users/form';
+import Card from '@/components/ui/Card';
 
 export default function AddUser() {
   const navigate = useNavigate();

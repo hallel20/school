@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 // import { useAuth } from '../../hooks/useAuth';
 import Sidebar from '../../components/ui/Sidebar';
 import Spinner from '../../components/ui/Spinner'; // Import the Spinner
@@ -8,8 +8,12 @@ import Spinner from '../../components/ui/Spinner'; // Import the Spinner
 const Overview = lazy(() => import('./Overview'));
 const Users = lazy(() => import('./Users'));
 const Courses = lazy(() => import('./Courses'));
+const Departments = lazy(() => import('./Departments'));
+const Faculties = lazy(() => import('./Faculties'));
+// const Results = lazy(() => import('./Results'));
 const AcademicSessions = lazy(() => import('./AcademicSessions'));
 const Settings = lazy(() => import('./Settings'));
+const NotFound = lazy(() => import('../NotFound'));
 
 const AdminDashboard = () => {
   // const { user } = useAuth();
@@ -67,12 +71,14 @@ const AdminDashboard = () => {
               <Route path="/" element={<Overview />} />
               <Route path="/users/*" element={<Users />} />
               <Route path="/courses/*" element={<Courses />} />
+              <Route path="/faculties/*" element={<Faculties />} />
+              <Route path="/departments/*" element={<Departments />} />
               <Route
                 path="/academic-sessions/*"
                 element={<AcademicSessions />}
               />
               <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </main>

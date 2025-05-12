@@ -1,0 +1,49 @@
+import { useNavigate, useParams } from 'react-router-dom';
+import { Department } from '@/types';
+import { DepartmentDetails } from '@/components/Department/DepartmentDetails';
+import useFetch from '@/hooks/useFetch';
+import Spinner from '@/components/ui/Spinner';
+import PageHeader from '@/components/ui/PageHeader';
+import Button from '@/components/ui/Button';
+import AdminNotFound from '@/components/AdminNotFound';
+
+export default function ViewDepartment() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const departmentId = Number(id);
+
+  const { data: department, loading } = useFetch<Department>(
+    `/departments/${departmentId}`
+  );
+
+  if (loading) {
+    return <Spinner />;
+  }
+
+  if (!department)
+    return (
+      <AdminNotFound
+        id={String(departmentId)}
+        title="Department"
+        route="departments"
+        dashboard="admin"
+      />
+    );
+
+  return (
+    <div>
+      <PageHeader
+        title={department?.name || 'Department Details'}
+        actions={
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/admin/departments')}
+          >
+            Back to Departments
+          </Button>
+        }
+      />
+      {department && <DepartmentDetails department={department} />}
+    </div>
+  );
+}

@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/ui/PageHeader';
 import Table from '@/components/ui/Table';
 import Button from '@/components/ui/Button';
@@ -6,79 +6,72 @@ import Card from '@/components/ui/Card';
 import { PlusCircle, Edit, Trash, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useFetch from '@/hooks/useFetch';
-import { Course } from '@/types';
+import { Department } from '@/types';
 import Pagination from '@/components/ui/pagination';
 import { useState } from 'react';
-import ViewCourse from '@/components/modals/ViewCourse';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import api from '@/services/api';
 import Select from '@/components/ui/Select';
 
-interface CourseResponse {
-  courses: Course[];
+interface DepartmentResponse {
+  departments: Department[];
   page: number;
   pageSize: number;
   totalPages: number;
-  totalCourses: number;
+  totalDepartments: number;
 }
 
-const CoursesList = () => {
+export default function DepartmentList() {
   const navigate = useNavigate();
   const searchParams = useSearchParams();
   const page = searchParams[0].get('page') || '1';
   const pageNumber = parseInt(page, 10);
   const pageSizeParam = searchParams[0].get('pageSize') || '10';
   const pageSizeNumber = parseInt(pageSizeParam, 10);
-  const [course, setCourse] = useState<Course | null>(null);
-  const [open, setOpen] = useState(false);
   const [pageSize, setPageSize] = useState(pageSizeNumber);
   const {
-    data: { courses, totalPages } = {
-      courses: [],
+    data: { departments, totalPages } = {
+      departments: [],
       totalPages: 0,
     },
     loading: isLoading,
     refetch,
-  } = useFetch<CourseResponse>(
-    `/courses?page=${pageNumber}&pageSize=${pageSizeNumber}`
-  ); // Custom hook to fetch courses
+  } = useFetch<DepartmentResponse>(
+    `/departments?page=${pageNumber}&pageSize=${pageSizeNumber}`
+  ); // Custom hook to fetch departments
   const { openDeleteConfirmation, DeleteModal } = useDeleteConfirmation();
 
   const handlePageChange = (page: number) => {
-    navigate(`/admin/courses?page=${page}&pageSize=${pageSize}`);
+    navigate(`/admin/departments?page=${page}&pageSize=${pageSize}`);
   };
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    navigate(`/admin/courses?page=${page}&pageSize=${size}`);
+    navigate(`/admin/departments?page=${page}&pageSize=${size}`);
   };
 
   const columns = [
     { header: 'Code', accessor: 'code' },
-    { header: 'Course Name', accessor: 'name' },
-    { header: 'Credits', accessor: 'credits' },
+    { header: 'Department Name', accessor: 'name' },
     {
-      header: 'Lecturer',
-      accessor: (course: Course) =>
-        course.lecturer?.firstName + ' ' + course.lecturer?.lastName,
+      header: 'HOD',
+      accessor: (department: Department) =>
+        department.hod?.firstName + ' ' + department.hod?.lastName,
     },
     {
       header: 'Actions',
-      accessor: (course: Course) => (
+      accessor: (department: Department) => (
         <div className="flex space-x-2">
-          <button
+          <Link
+            to={`/admin/departments/${department.id}`}
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewCourse(course);
-            }}
           >
             <Eye size={16} />
-          </button>
+          </Link>
           <button
             className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/admin/courses/edit/${course.id}`);
+              navigate(`/admin/departments/edit/${department.id}`);
             }}
           >
             <Edit size={16} />
@@ -88,13 +81,13 @@ const CoursesList = () => {
             onClick={(e) => {
               e.stopPropagation();
               openDeleteConfirmation({
-                title: 'Delete Course',
-                message: `Are you sure you want to delete course ${course.code}?`,
+                title: 'Delete Department',
+                message: `Are you sure you want to delete department ${department.code}?`,
                 onConfirm: async () => {
-                  await toast.promise(api.delete(`/courses/${course.id}`), {
+                  await toast.promise(api.delete(`/departments/${department.id}`), {
                     loading: 'Deleting...',
-                    success: `Deleted course ${course.name}`,
-                    error: `Failed to delete user ${course.name}`,
+                    success: `Deleted department ${department.name}`,
+                    error: `Failed to delete user ${department.name}`,
                   });
                   refetch();
                 },
@@ -108,24 +101,19 @@ const CoursesList = () => {
     },
   ];
 
-  const handleViewCourse = (course: Course) => {
-    setCourse(course);
-    setOpen(true);
-  };
-
   return (
     <>
       <div className="px-4 py-6">
         <PageHeader
-          title="Course Management"
-          subtitle="View and manage all courses"
+          title="Department Management"
+          subtitle="View and manage all departments"
           actions={
             <Button
               variant="primary"
               leftIcon={<PlusCircle size={16} />}
-              onClick={() => navigate('/admin/courses/add')}
+              onClick={() => navigate('/admin/departments/add')}
             >
-              Add Course
+              Add Department
             </Button>
           }
         />
@@ -146,10 +134,10 @@ const CoursesList = () => {
         <Card>
           <Table
             columns={columns}
-            data={courses}
+            data={departments}
             keyField="id"
             isLoading={isLoading}
-            onRowClick={(course) => handleViewCourse(course as Course)}
+            onRowClick={(department) => navigate("/admin/departments/" + department.id)}
           />
         </Card>
         <Pagination
@@ -158,16 +146,7 @@ const CoursesList = () => {
           onPageChange={handlePageChange}
         />
       </div>
-      {open && course && (
-        <ViewCourse
-          course={course}
-          onClose={() => setOpen(false)}
-          open={open}
-        />
-      )}
       <DeleteModal />
     </>
   );
-};
-
-export default CoursesList;
+}

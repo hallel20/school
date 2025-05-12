@@ -68,7 +68,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 // Create course - Admin only
 router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Request, res: Response) => {
   try {
-    const { name, code, credits, lecturerId } = req.body;
+    const { name, code, credits, lecturerId, departmentId } = req.body;
 
     const existingCourse = await prisma.course.findUnique({
       where: { code },
@@ -82,6 +82,7 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
         name,
         code,
         credits,
+        departmentId,
         lecturerId: lecturerId ? parseInt(lecturerId) : null
       },
       include: {

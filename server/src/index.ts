@@ -9,6 +9,8 @@ import academicRoutes from './routes/academic';
 import settingsRoutes from './routes/settings';
 import logRoutes from './routes/logs';
 import adminRoutes from './routes/admin';
+import departmentRoutes from './routes/departments';
+import facultyRoutes from './routes/faculties';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import fs from 'fs';
@@ -59,6 +61,8 @@ app.use('/api/academic', academicRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/admin', adminRoutes)
+app.use('/api/departments', departmentRoutes);
+app.use('/api/faculties', facultyRoutes);
 
 const PORT = process.env.PORT || 5000;
 

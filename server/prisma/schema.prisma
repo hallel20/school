@@ -2,7 +2,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output = ".prisma/client"
 }
 
 datasource db {
@@ -35,6 +34,8 @@ model Student {
   results      Result[]
   department   Department @relation(fields: [departmentId], references: [id])
   departmentId Int
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
 }
 
 enum StaffPosition {
@@ -57,6 +58,8 @@ model Staff {
   assignedCourses Course[]
   dean            Dean?
   hod             HOD?
+  isDeleted       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
 }
 
 model Faculty {
@@ -64,7 +67,11 @@ model Faculty {
   name        String
   code        String       @unique
   dean        Dean?
+  deanId      Int?        @unique
   departments Department[]
+  isDeleted   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt @default(now())
 }
 
 model Dean {
@@ -73,6 +80,7 @@ model Dean {
   staffId   Int      @unique
   faculty   Faculty? @relation(fields: [facultyId], references: [id])
   facultyId Int?     @unique
+  isDeleted Boolean  @default(false)
 
   @@unique([facultyId, staffId])
 }
@@ -83,6 +91,7 @@ model HOD {
   staffId      Int         @unique
   department   Department? @relation(fields: [departmentId], references: [id])
   departmentId Int         @unique
+  isDeleted    Boolean     @default(false)
 }
 
 model Department {
@@ -96,6 +105,7 @@ model Department {
   courses   Course[]
   students  Student[]
   staffs    Staff[]
+  isDeleted Boolean   @default(false)
 }
 
 model Course {
@@ -109,6 +119,8 @@ model Course {
   lecturerId   Int?
   students     Student[]  @relation("StudentCourses")
   results      Result[]
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
 }
 
 model Result {

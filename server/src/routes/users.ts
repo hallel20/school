@@ -82,7 +82,7 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 // Create user - Admin only
 router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Request, res: Response) => {
   try {
-    const { email, password, role, firstName, lastName } = req.body;
+    const { email, password, role, firstName, lastName, departmentId, position } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -107,6 +107,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
             create: {
               firstName,
               lastName,
+              departmentId,
               studentId: `STU${padToTenThousands(nextStudent)}`
             }
           }
@@ -116,6 +117,8 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
             create: {
               firstName,
               lastName,
+              departmentId,
+              position,
               staffId: `STAFF${padToTenThousands(nextStaff)}`
             }
           }
@@ -151,13 +154,42 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
 // Update user - Admin only
 router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
-    const { email, role, firstName, lastName } = req.body;
+    const { email, role, firstName, lastName, departmentId, position } = req.body;
 
-    const user = await prisma.user.update({
+    const nextUserIds = await prisma.nextId.findMany()
+    const nextStudent = nextUserIds.find((user) => user.tableName === 'student')?.nextId || 1;
+    const nextStaff = nextUserIds.find((user) => user.tableName === 'staff')?.nextId || 1;
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: parseInt(req.params.id) },
+      include: {
+        staff: true,
+        student: true
+      }
+    });
+
+    if (!existingUser) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+
+    const isEmailTaken = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true }
+    });
+    if (isEmailTaken && isEmailTaken.id !== existingUser.id) {
+      return res.status(400).send({ message: 'Email already in use' });
+    }
+
+
+    let user;
+    if (existingUser?.staff || existingUser?.student) {
+      user = await prisma.user.update({
       where: { id: parseInt(req.params.id) },
       data: {
         email,
         role,
+        ...(req.body.password && { password: hashedPassword }),
         ...(role === 'Student' && {
           student: {
             update: {
@@ -180,6 +212,55 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
         staff: true
       }
     });
+    } else {
+      user = await prisma.user.update({
+        where: { id: parseInt(req.params.id) },
+        data: {
+          email,
+          role,
+          ...(req.body.password && { password: hashedPassword }),
+          ...(role === 'Student' && {
+            student: {
+              create: {
+                firstName,
+                lastName,
+                departmentId,
+                studentId: `STU${padToTenThousands(nextStudent)}`
+              }
+            }
+          }),
+          ...(role === 'Staff' && {
+            staff: {
+              create: {
+                firstName,
+                lastName,
+                departmentId,
+                position,
+                staffId: `STAFF${padToTenThousands(nextStaff)}`
+              }
+            }
+          })
+        },
+        include: {
+          student: true,
+          staff: true
+        }
+      });
+    }
+
+    // Update the next available ID for the user
+    if (role === 'Student') {
+      await prisma.nextId.update({
+        where: { tableName: 'student' },
+        data: { nextId: nextStudent + 1 }
+      });
+    }
+    if (role === 'Staff') {
+      await prisma.nextId.update({
+        where: { tableName: 'staff' },
+        data: { nextId: nextStaff + 1 }
+      });
+    }
 
     res.send(user);
   } catch (error) {

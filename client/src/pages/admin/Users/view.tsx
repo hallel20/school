@@ -1,12 +1,12 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import Button from '../../../components/ui/Button';
-import Card from '../../../components/ui/Card';
-import PageHeader from '../../../components/ui/PageHeader';
-import Spinner from '../../../components/ui/Spinner';
-import useFetch from '../../../hooks/useFetch';
-import { User } from '../../../types';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import PageHeader from '@/components/ui/PageHeader';
+import Spinner from '@/components/ui/Spinner';
+import useFetch from '@/hooks/useFetch';
+import { User } from '@/types';
 import NotFound from '../../NotFound';
-import UserDetails from '../../../components/users/details';
+import UserDetails from '@/components/users/details';
 
 export default function ViewUser() {
   const navigate = useNavigate();

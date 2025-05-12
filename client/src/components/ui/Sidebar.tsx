@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart,
+  Building,
+  ListChecks,
 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -37,6 +39,16 @@ const Sidebar = ({ role }: SidebarProps) => {
     { title: 'Users', path: '/admin/users', icon: <Users size={20} /> },
     { title: 'Courses', path: '/admin/courses', icon: <BookOpen size={20} /> },
     {
+      title: 'Departments',
+      path: '/admin/departments',
+      icon: <Building size={20} />,
+    },
+    {
+      title: 'Faculties',
+      path: '/admin/faculties',
+      icon: <Building size={20} />,
+    },
+    {
       title: 'Academic Sessions',
       path: '/admin/academic-sessions',
       icon: <Calendar size={20} />,
@@ -55,7 +67,11 @@ const Sidebar = ({ role }: SidebarProps) => {
       path: '/staff/courses',
       icon: <BookOpen size={20} />,
     },
-    { title: 'Results', path: '/staff/results', icon: <BarChart size={20} /> },
+    {
+      title: 'Results',
+      path: '/staff/results',
+      icon: <ListChecks size={20} />,
+    },
     { title: 'Profile', path: '/staff/profile', icon: <User size={20} /> },
   ];
 

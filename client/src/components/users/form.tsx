@@ -5,25 +5,51 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { User } from '../../types';
+import { Department, User, Faculty } from '../../types'; // Added Faculty
+import Select from '../ui/Select';
+import useFetch from '@/hooks/useFetch';
 
 // Define the Zod schema for user fields
 const baseUserSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
   password: z
     .string()
-    .min(6, { message: 'Password must be at least 6 characters' }),
+    .min(6, { message: 'Password must be at least 6 characters' })
+    .optional(),
   role: z.enum(['Student', 'Staff', 'Admin'], {
+    // Keep role as required
     errorMap: () => ({ message: 'Please select a role' }),
   }),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
+  update: z.boolean().optional(), // For edit mode
+  position: z.enum(['lecturer', 'doctor', 'professor', 'assistant']),
+  facultyId: z
+    .union([z.string(), z.number()])
+    .optional()
+    .nullable()
+    .transform((val) => (val ? Number(val) : null)),
+  departmentId: z
+    .union([z.string(), z.number()])
+    .optional()
+    .nullable()
+    .transform((val) => (val ? Number(val) : null)),
   // studentId and staffId are not part of the form input directly if auto-assigned
   // They will be added to the payload before sending to the backend if needed
 });
 
 // Refine schema to make firstName and lastName required for Student and Staff
 const UserFormSchema = baseUserSchema.superRefine((data, ctx) => {
+  // Make password required only if it's not an update (i.e., user prop is not provided)
+  if (!data.update && (!data.password || data.password.length < 6)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.too_small,
+      minimum: 6,
+      type: 'string',
+      message: 'Password must be at least 6 characters',
+      inclusive: true,
+    });
+  }
   if (data.role === 'Student' || data.role === 'Staff') {
     if (!data.firstName || data.firstName.trim() === '') {
       ctx.addIssue({
@@ -40,6 +66,41 @@ const UserFormSchema = baseUserSchema.superRefine((data, ctx) => {
       });
     }
   }
+  if (data.role === 'Staff') {
+    if (!data.position) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Position is required for Staff role',
+        path: ['position'],
+      });
+    }
+    // If role is Student or Staff, departmentId should be required
+    if (
+      (['Student', 'Staff'] as Array<UserFormData['role']>).includes(
+        data.role
+      ) &&
+      !data.departmentId
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Department is required for this role',
+        path: ['departmentId'],
+      });
+    }
+    // If role is Student or Staff, facultyId should be required (as department depends on it)
+    if (
+      (['Student', 'Staff'] as Array<UserFormData['role']>).includes(
+        data.role
+      ) &&
+      !data.facultyId
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Faculty is required to select a department',
+        path: ['facultyId'],
+      });
+    }
+  }
 });
 
 type UserFormData = z.infer<typeof UserFormSchema>;
@@ -53,6 +114,7 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
     watch, // To watch changes in form values if needed
   } = useForm<UserFormData>({
     resolver: zodResolver(UserFormSchema),
@@ -62,6 +124,14 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
       role: user?.role || 'Student', // Default role
       firstName: user?.staff?.firstName || user?.student?.firstName || '',
       lastName: user?.staff?.lastName || user?.student?.lastName || '',
+      position: user?.staff?.position || 'lecturer', // Default position for staff
+      facultyId:
+        user?.staff?.department?.facultyId ||
+        user?.student?.department?.facultyId ||
+        null,
+      update: !!user, // Set to true if user is provided (edit mode)
+      departmentId:
+        user?.staff?.departmentId || user?.student?.departmentId || null,
     },
   });
 
@@ -76,8 +146,20 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling button during submission
   const [submitError, setSubmitError] = useState<string | null>(null); // For displaying submission errors
 
-  // Watch the role field to potentially update accountType
+  const watchedFacultyId = watch('facultyId');
   const watchedRole = watch('role');
+
+  const { data: facultiesData, loading: facultiesLoading } = useFetch<{
+    faculties: Faculty[];
+  }>('/faculties'); // Fetch faculties for the select input
+  const faculties = facultiesData?.faculties || [];
+
+  const { data: departmentsData, loading: departmentsLoading } = useFetch<{
+    departments: Department[];
+  }>(
+    watchedFacultyId ? `/departments?facultyId=${watchedFacultyId}` : null // Fetch departments only if facultyId is selected
+  );
+  const departments = departmentsData?.departments || [];
 
   useEffect(() => {
     // Update accountType based on the selected role
@@ -90,7 +172,16 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
     } else if (watchedRole === 'Admin') {
       setAccountType('admin'); // Admins might not have a student/staff ID
     }
-  }, [watchedRole]);
+    // Reset department if role changes to Admin or if faculty changes
+    if (watchedRole === 'Admin') {
+      setValue('departmentId', null);
+      setValue('facultyId', null);
+    }
+  }, [watchedRole, setValue]);
+
+  useEffect(() => {
+    setValue('departmentId', null); // Reset department when faculty changes
+  }, [watchedFacultyId, setValue]);
 
   const navigate = useNavigate();
 
@@ -101,7 +192,12 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
     // Construct the payload to send to the backend
     // Include studentId or staffId based on the accountType and fetched nextAvailableIds
     const submissionData: Partial<
-      UserFormData & { studentId?: number; staffId?: number }
+      UserFormData & {
+        studentId?: number;
+        staffId?: number;
+        position?: string;
+        departmentId?: number | null;
+      }
     > = {
       email: data.email,
       password: data.password,
@@ -111,6 +207,13 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
     if (data.role === 'Student' || data.role === 'Staff') {
       submissionData.firstName = data.firstName;
       submissionData.lastName = data.lastName;
+      submissionData.departmentId = data.departmentId
+        ? Number(data.departmentId)
+        : null;
+    }
+
+    if (data.role === 'Staff') {
+      submissionData.position = data.position;
     }
 
     console.log('Submitting user:', submissionData);
@@ -155,7 +258,7 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
   return (
     <div className="container mx-auto p-4 mt-7 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-        Add New User
+        {user ? 'Edit User' : 'Add New User'}
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Grid for Email, Password, and Role */}
@@ -217,7 +320,7 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
             >
               Role
             </label>
-            <select
+            <Select
               id="role"
               {...register('role')}
               className={`mt-1 block w-full px-3 py-2 border ${
@@ -225,11 +328,12 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
                   ? 'border-red-500'
                   : 'border-gray-300 dark:border-gray-600'
               } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
-            >
-              <option value="Student">Student</option>
-              <option value="Staff">Staff</option>
-              <option value="Admin">Admin</option>
-            </select>
+              options={[
+                { value: 'Student', label: 'Student' },
+                { value: 'Staff', label: 'Staff' },
+                { value: 'Admin', label: 'Admin' },
+              ]}
+            />
             {errors.role && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                 {errors.role.message}
@@ -297,6 +401,94 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
                 )}
               </div>
             </div>
+          )}
+          {watchedRole === 'Staff' && (
+            <div className="pt-6">
+              <label
+                htmlFor="position"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Position
+              </label>
+              <Select
+                id="position"
+                {...register('position')}
+                className={`mt-1 block w-full px-3 py-2 border ${
+                  errors.position ? 'border-red-500' : ''
+                }`}
+                options={[
+                  { value: 'lecturer', label: 'Lecturer' },
+                  { value: 'doctor', label: 'Doctor' },
+                  { value: 'assistant', label: 'Assistant' },
+                  { value: 'professor', label: 'Professor' },
+                ]}
+              />
+            </div>
+          )}
+          {(watchedRole === 'Student' || watchedRole === 'Staff') && (
+            <>
+              <div className="pt-6">
+                <label
+                  htmlFor="facultyId"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Faculty
+                </label>
+                <Select
+                  id="facultyId"
+                  {...register('facultyId')}
+                  className={`mt-1 block w-full px-3 py-2 border ${
+                    errors.facultyId
+                      ? 'border-red-500'
+                      : 'border-gray-300 dark:border-gray-600'
+                  } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
+                  options={[
+                    { value: '', label: 'Select Faculty' },
+                    ...(faculties?.map((fac: Faculty) => ({
+                      value: fac.id,
+                      label: fac.name,
+                    })) || []),
+                  ]}
+                  disabled={facultiesLoading}
+                />
+                {errors.facultyId && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.facultyId.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-6">
+                <label
+                  htmlFor="departmentId"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Department
+                </label>
+                <Select
+                  id="departmentId"
+                  {...register('departmentId')}
+                  className={`mt-1 block w-full px-3 py-2 border ${
+                    errors.departmentId
+                      ? 'border-red-500'
+                      : 'border-gray-300 dark:border-gray-600'
+                  } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
+                  options={[
+                    { value: '', label: 'Select Department' },
+                    ...(departments?.map((dept: Department) => ({
+                      value: dept.id.toString(),
+                      label: dept.name,
+                    })) || []),
+                  ]}
+                  disabled={!watchedFacultyId}
+                />
+                {errors.departmentId && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.departmentId.message}
+                  </p>
+                )}
+              </div>
+            </>
           )}
         </div>
 

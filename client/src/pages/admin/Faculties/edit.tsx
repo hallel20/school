@@ -2,26 +2,26 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import PageHeader from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
-import { Course } from '@/types';
+import { Faculty } from '@/types';
 import Spinner from '@/components/ui/Spinner';
 import useFetch from '@/hooks/useFetch';
-import CourseForm from '@/components/courses/form';
+import FacultyForm from '@/components/faculties/form';
 import AdminNotFound from '@/components/AdminNotFound';
 
-export default function EditCourse() {
+export default function EditFaculty() {
   const navigate = useNavigate();
   const id = useParams().id;
 
-  const { data: course, loading } = useFetch<Course>('/courses/' + id);
+  const { data: faculty, loading } = useFetch<Faculty>('/faculties/' + id);
 
   if (loading) return <Spinner />;
 
-  if (!course) {
+  if (!faculty) {
     return (
       <AdminNotFound
         id={String(id)}
-        title="Course"
-        route="courses"
+        title="Faculty"
+        route="faculties"
         dashboard="admin"
       />
     );
@@ -30,19 +30,19 @@ export default function EditCourse() {
   return (
     <div className="px-4 py-6">
       <PageHeader
-        title="Edit Course"
-        subtitle={`Edit course ${course?.code} - ${course?.name}`}
+        title="Edit Faculty"
+        subtitle={`Edit faculty ${faculty?.code} - ${faculty?.name}`}
         actions={
           <Button
             variant="secondary"
-            onClick={() => navigate('/admin/courses')}
+            onClick={() => navigate('/admin/faculties')}
           >
-            Back to Courses
+            Back to Facultys
           </Button>
         }
       />
       <Card>
-        <CourseForm course={course} />
+        <FacultyForm faculty={faculty} />
       </Card>
     </div>
   );

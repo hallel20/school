@@ -42,7 +42,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // If the error is due to an expired access token, redirect to login
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       localStorage.removeItem("accessToken"); // Clear expired token

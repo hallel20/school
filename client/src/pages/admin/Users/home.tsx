@@ -1,18 +1,18 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import PageHeader from '../../../components/ui/PageHeader';
-import Select from '../../../components/ui/Select';
-import Table from '../../../components/ui/Table';
-import Button from '../../../components/ui/Button';
-import Card from '../../../components/ui/Card';
+import PageHeader from '@/components/ui/PageHeader';
+import Select from '@/components/ui/Select';
+import Table from '@/components/ui/Table';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import { PlusCircle, Edit, Trash, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useFetch from '../../../hooks/useFetch';
-import { User } from '../../../types';
-import { getUserName } from '../../../utils';
+import useFetch from '@/hooks/useFetch';
+import { User } from '@/types';
+import { getUserName } from '@/utils';
 import { useState } from 'react';
-import Pagination from '../../../components/ui/pagination';
-import { useDeleteConfirmation } from '../../../hooks/useDeleteConfirmation';
-import api from '../../../services/api';
+import Pagination from '@/components/ui/pagination';
+import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
+import api from '@/services/api';
 
 interface UsersResponse {
   users: User[];
