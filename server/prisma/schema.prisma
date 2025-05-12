@@ -2,6 +2,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output = ".prisma/client"
 }
 
 datasource db {
@@ -54,6 +55,8 @@ model Staff {
   department      Department    @relation(fields: [departmentId], references: [id])
   departmentId    Int // Default to a specific department
   assignedCourses Course[]
+  dean            Dean?
+  hod             HOD?
 }
 
 model Faculty {
@@ -62,29 +65,24 @@ model Faculty {
   code        String       @unique
   dean        Dean?
   departments Department[]
-  hods        HOD[]
 }
 
 model Dean {
-  id        Int     @id @default(autoincrement())
-  name      String
-  code      String
-  faculty   Faculty @relation(fields: [facultyId], references: [id])
-  facultyId Int     @unique
+  id        Int      @id @default(autoincrement())
+  staff     Staff    @relation(fields: [staffId], references: [id])
+  staffId   Int      @unique
+  faculty   Faculty? @relation(fields: [facultyId], references: [id])
+  facultyId Int?     @unique
 
-  @@unique([facultyId, code])
+  @@unique([facultyId, staffId])
 }
 
 model HOD {
   id           Int         @id @default(autoincrement())
-  name         String
-  code         String      @unique
-  faculty      Faculty     @relation(fields: [facultyId], references: [id])
-  facultyId    Int         @unique
+  staff        Staff       @relation(fields: [staffId], references: [id])
+  staffId      Int         @unique
   department   Department? @relation(fields: [departmentId], references: [id])
   departmentId Int         @unique
-
-  @@unique([departmentId, facultyId])
 }
 
 model Department {
