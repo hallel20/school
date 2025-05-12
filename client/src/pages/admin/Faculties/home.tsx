@@ -54,17 +54,17 @@ export default function FacultyList() {
     { header: 'Faculty Name', accessor: 'name' },
     {
       header: 'Dean',
-      accessor: (department: Faculty) =>
-        department.dean?.firstName ||
-        'Not' + ' ' + department.dean?.lastName ||
-        'Selected',
+      accessor: (faculty: Faculty) =>
+        (faculty.dean?.firstName || 'Not') +
+        ' ' +
+        (faculty.dean?.lastName || 'Selected'),
     },
     {
       header: 'Actions',
-      accessor: (department: Faculty) => (
+      accessor: (faculty: Faculty) => (
         <div className="flex space-x-2">
           <Link
-            to={`/admin/faculties/${department.id}`}
+            to={`/admin/faculties/edit/${faculty.id}`}
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
             <Eye size={16} />
@@ -73,7 +73,7 @@ export default function FacultyList() {
             className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/admin/faculties/edit/${department.id}`);
+              navigate(`/admin/faculties/edit/${faculty.id}`);
             }}
           >
             <Edit size={16} />
@@ -84,16 +84,13 @@ export default function FacultyList() {
               e.stopPropagation();
               openDeleteConfirmation({
                 title: 'Delete Faculty',
-                message: `Are you sure you want to delete department ${department.code}?`,
+                message: `Are you sure you want to delete faculty ${faculty.code}?`,
                 onConfirm: async () => {
-                  await toast.promise(
-                    api.delete(`/faculties/${department.id}`),
-                    {
-                      loading: 'Deleting...',
-                      success: `Deleted department ${department.name}`,
-                      error: `Failed to delete user ${department.name}`,
-                    }
-                  );
+                  await toast.promise(api.delete(`/faculties/${faculty.id}`), {
+                    loading: 'Deleting...',
+                    success: `Deleted faculty ${faculty.name}`,
+                    error: `Failed to delete user ${faculty.name}`,
+                  });
                   refetch();
                 },
               });
@@ -142,8 +139,8 @@ export default function FacultyList() {
             data={faculties}
             keyField="id"
             isLoading={isLoading}
-            onRowClick={(department) =>
-              navigate('/admin/faculties/' + department.id)
+            onRowClick={(faculty) =>
+              navigate('/admin/faculties/edit/' + faculty.id)
             }
           />
         </Card>

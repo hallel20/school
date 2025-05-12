@@ -22,8 +22,34 @@ export async function GET(req: Request, res: Response) {
                         isDeleted: false,
                     },
                 },
-                dean: true
             },
+        });
+
+        const allDeanIds = faculties.map(faculty => faculty.deanId).filter(id => id !== null);
+        const allDeans = await prisma.staff.findMany({
+            where: {
+                id: { in: allDeanIds },
+                isDeleted: false,
+            },
+            include: {
+                user: true
+            }
+        })
+        const deanMap = new Map(allDeans.map(dean => [dean.id, dean]));
+        faculties.forEach(faculty => {
+            const deanId = faculty.deanId;
+            if (deanId !== null) {
+                const dean = deanMap.get(deanId);
+                if (dean) {
+                    (faculty as any).dean = {
+                        id: dean.id,
+                        firstName: dean.firstName,
+                        lastName: dean.lastName,
+                        email: dean.user?.email,
+                        role: dean.user?.role,
+                    };
+                }
+            }
         });
         const allFacultiesCount = await prisma.faculty.count({
             where: {

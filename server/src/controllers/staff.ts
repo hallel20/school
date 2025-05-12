@@ -11,7 +11,7 @@ export const GET = async (req: Request, res: Response) => {
         const where: any = {
             isDeleted: false,
         };
-        if (facultyId) {
+        if (facultyId && facultyId !== "undefined") {
             const departments = await prisma.department.findMany({
                 where: {
                     isDeleted: false,

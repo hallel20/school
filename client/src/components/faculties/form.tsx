@@ -118,7 +118,7 @@ const FacultyForm: React.FC<FacultyFormProps> = ({ faculty }) => {
   };
 
   return (
-    <div className="container mx-auto p-4 mt-7 max-w-2xl">
+    <div className="container mx-auto p-4 mt-7 max-w-2xl min-h-96">
       <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
         {faculty ? 'Edit Faculty' : 'Add New Faculty'}
       </h1>
