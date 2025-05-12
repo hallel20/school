@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 .env
 
+database
+db_backup.json
+
 
 # lock files
 package-lock.json
