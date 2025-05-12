@@ -60,18 +60,44 @@ model Faculty {
   id          Int          @id @default(autoincrement())
   name        String
   code        String       @unique
+  dean        Dean?
   departments Department[]
+  hods        HOD[]
+}
+
+model Dean {
+  id        Int     @id @default(autoincrement())
+  name      String
+  code      String
+  faculty   Faculty @relation(fields: [facultyId], references: [id])
+  facultyId Int     @unique
+
+  @@unique([facultyId, code])
+}
+
+model HOD {
+  id           Int         @id @default(autoincrement())
+  name         String
+  code         String      @unique
+  faculty      Faculty     @relation(fields: [facultyId], references: [id])
+  facultyId    Int         @unique
+  department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId Int         @unique
+
+  @@unique([departmentId, facultyId])
 }
 
 model Department {
   id        Int       @id @default(autoincrement())
   name      String    @unique
   code      String    @unique
+  HOD       HOD?
+  hodId     Int?      @unique
   faculty   Faculty   @relation(fields: [facultyId], references: [id])
   facultyId Int
   courses   Course[]
   students  Student[]
-  staffs     Staff[]
+  staffs    Staff[]
 }
 
 model Course {
