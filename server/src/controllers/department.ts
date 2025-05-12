@@ -51,27 +51,28 @@ export async function GET(req: Request, res: Response) {
             },
         });
 
-        const headOfDepartments = await prisma.staff.findMany({
+        const validHodIds = departments.map(department => department.hodId).filter(id => id !== null);
+
+        const headOfDepartments = await prisma.hOD.findMany({
             where: {
-                departmentId: {
-                    in: departments.map(department => department.id),
+                id: {
+                    in: validHodIds
                 },
             },
             include: {
-                user: true,
+                staff: {
+                    include: {
+                        user: true
+                    }
+                },
             },
         });
+        console.log(headOfDepartments)
 
         departments.forEach(department => {
             const headOfDepartment = headOfDepartments.find(head => head.departmentId === department.id);
             if (headOfDepartment) {
-                (department as any).hod = {
-                    id: headOfDepartment.id,
-                    firstName: headOfDepartment.firstName,
-                    lastName: headOfDepartment.lastName,
-                    email: headOfDepartment.user?.email,
-                    role: headOfDepartment.user?.role,
-                };
+                (department as any).hod = headOfDepartment.staff;
             }
         })
 
@@ -113,9 +114,25 @@ export async function POST(req: Request, res: Response) {
                 name,
                 code,
                 facultyId,
-                hodId: hodId ? Number(hodId) : null,
             },
         });
+
+        const HOD = await prisma.hOD.create({
+            data: {
+                staffId: hodId,
+                departmentId: department.id
+            }
+        })
+        department.hodId = HOD.id;
+
+        await prisma.department.update({
+            where: {
+                id: department.id
+            },
+            data: {
+                hodId: HOD.id
+            }
+        })
         res.status(201).json(department);
     } catch (error) {
         console.error(error);
@@ -137,12 +154,36 @@ export async function PUT(req: Request, res: Response) {
 
 
     try {
+        let HOD;
+        const existingHod = await prisma.hOD.findUnique({
+            where: {
+                departmentId: Number(id)
+            }
+        })
+        if (existingHod) {
+            HOD = await prisma.hOD.update({
+                where: {
+                    id: existingHod.id
+                },
+                data: {
+                    staffId: hodId ? Number(hodId) : undefined
+                }
+            })
+        } else if (hodId) {
+            HOD = await prisma.hOD.create({
+                data: {
+                    staffId: hodId,
+                    departmentId: Number(id)
+                }
+            })
+        }
+
         const department = await prisma.department.update({
             where: { id: Number(id) },
             data: {
                 name,
                 code,
-                hodId: hodId ? Number(hodId) : null,
+                hodId: HOD ? HOD.id : null,
                 facultyId: facultyId ? Number(facultyId) : undefined,
             },
         });
@@ -230,18 +271,66 @@ export async function DELETE(req: Request, res: Response) {
 }
 
 export async function GET_BY_ID(req: Request, res: Response) {
-    const { id } = req.params;
+    const { id, queryType } = req.params;
+
+    const includeOptions = {
+        courses: queryType === 'withCourses' || queryType === 'all',
+        students: (queryType === 'withStudents' || queryType === 'all') && { include: { user: true } },
+        staffs: (queryType === 'withStaffs' || queryType === 'all') && { include: { user: true } },
+        faculty: true,
+        HOD: true,
+    };
     try {
         const department = await prisma.department.findUnique({
             where: { id: Number(id) },
             include: {
-                courses: true,
-                staffs: { include: { user: true } },
+                ...includeOptions,
+                staffs: {
+                    include: {
+                        user: true
+                    }
+                },
+                courses: {
+                    include: {
+                        lecturer: {
+                            include: {
+                                user: true
+                            }
+                        }
+                    }
+                },
+                students: {
+                    include: {
+                        user: true
+                    }
+                }
             },
-        });
+
+        })
         if (!department) {
             return res.status(404).json({ message: 'Department not found' });
         }
+
+        const hodId = department.hodId
+
+        if (hodId) {
+            const headOfDepartment = await prisma.hOD.findUnique({
+                where: {
+                    id: hodId
+                },
+                include: {
+                    staff: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            });
+            // console.log(headOfDepartment);
+
+            (department as any).hod = headOfDepartment?.staff
+        }
+
         res.status(200).json(department);
     } catch (error) {
         console.error(error);

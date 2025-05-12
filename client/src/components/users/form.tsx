@@ -8,6 +8,7 @@ import api from '../../services/api';
 import { Department, User, Faculty } from '../../types'; // Added Faculty
 import Select from '../ui/Select';
 import useFetch from '@/hooks/useFetch';
+import Spinner from '../ui/Spinner';
 
 // Define the Zod schema for user fields
 const baseUserSchema = z.object({
@@ -123,10 +124,12 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
       firstName: user?.staff?.firstName || user?.student?.firstName || '',
       lastName: user?.staff?.lastName || user?.student?.lastName || '',
       position: user?.staff?.position || 'lecturer', // Default position for staff
-      facultyId: user?.facultyId || null,
+      facultyId: Number(user?.facultyId) || null,
       update: !!user, // Set to true if user is provided (edit mode)
       departmentId:
-        user?.staff?.departmentId || user?.student?.departmentId || null,
+        Number(user?.staff?.departmentId) ||
+        Number(user?.student?.departmentId) ||
+        undefined,
     },
   });
 
@@ -143,13 +146,14 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
 
   const watchedFacultyId = watch('facultyId');
   const watchedRole = watch('role');
+  const watchedDepartmentId = watch('departmentId');
 
   const { data: facultiesData, loading: facultiesLoading } = useFetch<{
     faculties: Faculty[];
   }>('/faculties'); // Fetch faculties for the select input
   const faculties = facultiesData?.faculties || [];
 
-  const { data: departmentsData } = useFetch<{
+  const { data: departmentsData, loading: departmentsLoading } = useFetch<{
     departments: Department[];
   }>(
     watchedFacultyId ? `/departments?facultyId=${watchedFacultyId}` : null // Fetch departments only if facultyId is selected
@@ -172,11 +176,13 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
       setValue('departmentId', null);
       setValue('facultyId', null);
     }
-  }, [watchedRole, setValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedRole]);
 
   useEffect(() => {
-    setValue('departmentId', null); // Reset department when faculty changes
-  }, [watchedFacultyId, setValue]);
+    setValue('departmentId', user?.staff?.departmentId || user?.student?.departmentId || null); // Reset department when faculty changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedFacultyId]);
 
   const navigate = useNavigate();
 
@@ -249,6 +255,8 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
       }
     }
   };
+
+  if (facultiesLoading) return <Spinner />;
 
   return (
     <div className="container mx-auto p-4 mt-7 max-w-2xl">
@@ -431,6 +439,7 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
                   Faculty
                 </label>
                 <Select
+                  defaultValue={Number(user?.facultyId) || ''}
                   id="facultyId"
                   {...register('facultyId')}
                   className={`mt-1 block w-full px-3 py-2 border ${
@@ -453,37 +462,39 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
                   </p>
                 )}
               </div>
-
-              <div className="pt-6">
-                <label
-                  htmlFor="departmentId"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Department
-                </label>
-                <Select
-                  id="departmentId"
-                  {...register('departmentId')}
-                  className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.departmentId
-                      ? 'border-red-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                  } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
-                  options={[
-                    { value: '', label: 'Select Department' },
-                    ...(departments?.map((dept: Department) => ({
-                      value: dept.id.toString(),
-                      label: dept.name,
-                    })) || []),
-                  ]}
-                  disabled={!watchedFacultyId}
-                />
-                {errors.departmentId && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                    {errors.departmentId.message}
-                  </p>
-                )}
-              </div>
+              {!departmentsLoading && (
+                <div className="pt-6">
+                  <label
+                    htmlFor="departmentId"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Department
+                  </label>
+                  <Select
+                    value={watchedDepartmentId || ''}
+                    id="departmentId"
+                    {...register('departmentId')}
+                    className={`mt-1 block w-full px-3 py-2 border ${
+                      errors.departmentId
+                        ? 'border-red-500'
+                        : 'border-gray-300 dark:border-gray-600'
+                    } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200`}
+                    options={[
+                      { value: '', label: 'Select Department' },
+                      ...(departments?.map((dept: Department) => ({
+                        value: dept.id,
+                        label: dept.name,
+                      })) || []),
+                    ]}
+                    disabled={!watchedFacultyId}
+                  />
+                  {errors.departmentId && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {errors.departmentId.message}
+                    </p>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>

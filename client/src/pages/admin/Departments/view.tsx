@@ -14,7 +14,7 @@ export default function ViewDepartment() {
   const departmentId = Number(id);
 
   const { data: department, loading } = useFetch<Department>(
-    `/departments/${departmentId}`
+    `/departments/${departmentId}?queryType=all`
   );
 
   if (loading) {
