@@ -33,11 +33,49 @@ router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Respons
       where,
       include: {
         student: true,
-        staff: true
+        staff: true,
       },
       take: pageSizeNumber,
       skip: (pageNumber - 1) * pageSizeNumber,
     });
+
+    const departmentIds = users
+      .map((user) => user.student?.departmentId || user.staff?.departmentId)
+      .filter((id): id is number => id !== undefined);
+
+    const faculties = await prisma.faculty.findMany({
+      where: {
+        departments: {
+          some: {
+            id: {
+              in: departmentIds,
+            },
+          },
+        },
+      },
+      include: {
+        departments: true,
+      },
+    });
+
+    users.forEach((user) => {
+      const departmentId = user.student?.departmentId || user.staff?.departmentId;
+      if (departmentId) {
+        const department = faculties.find((faculty) =>
+          faculty.departments.some((dept) => dept.id === departmentId)
+        )?.departments.find((dept) => dept.id === departmentId);
+        if (department) {
+          (user as any).department = {
+            id: department.id,
+            name: department.name,
+            code: department.code,
+            facultyId: faculties.find(f => f.departments.some(d => d.id === departmentId))?.id
+          };
+        }
+      }
+    });
+
+
     const allUsersCount = await prisma.user.count();
     const totalPages = Math.ceil(allUsersCount / pageSizeNumber);
 
@@ -69,6 +107,18 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     if (!user) {
       return res.status(404).send({ message: 'User not found' });
     }
+
+    const departmentId = user.staff?.departmentId || user.student?.departmentId;
+    if (departmentId) {
+      const department = await prisma.department.findUnique({
+        where: {
+          id: departmentId
+        }
+      });
+
+      (user as any).facultyId = department?.facultyId || undefined;
+    }
+
     res.send({
       ...user,
       password: undefined, // Exclude password from response
@@ -185,33 +235,33 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     let user;
     if (existingUser?.staff || existingUser?.student) {
       user = await prisma.user.update({
-      where: { id: parseInt(req.params.id) },
-      data: {
-        email,
-        role,
-        ...(req.body.password && { password: hashedPassword }),
-        ...(role === 'Student' && {
-          student: {
-            update: {
-              firstName,
-              lastName
+        where: { id: parseInt(req.params.id) },
+        data: {
+          email,
+          role,
+          ...(req.body.password && { password: hashedPassword }),
+          ...(role === 'Student' && {
+            student: {
+              update: {
+                firstName,
+                lastName
+              }
             }
-          }
-        }),
-        ...(role === 'Staff' && {
-          staff: {
-            update: {
-              firstName,
-              lastName
+          }),
+          ...(role === 'Staff' && {
+            staff: {
+              update: {
+                firstName,
+                lastName
+              }
             }
-          }
-        })
-      },
-      include: {
-        student: true,
-        staff: true
-      }
-    });
+          })
+        },
+        include: {
+          student: true,
+          staff: true
+        }
+      });
     } else {
       user = await prisma.user.update({
         where: { id: parseInt(req.params.id) },

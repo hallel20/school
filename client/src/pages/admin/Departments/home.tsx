@@ -55,7 +55,9 @@ export default function DepartmentList() {
     {
       header: 'HOD',
       accessor: (department: Department) =>
-        department.hod?.firstName + ' ' + department.hod?.lastName,
+        (department.hod?.firstName || 'Not') +
+        ' ' +
+        (department.hod?.lastName || 'Assigned'),
     },
     {
       header: 'Actions',
@@ -84,11 +86,14 @@ export default function DepartmentList() {
                 title: 'Delete Department',
                 message: `Are you sure you want to delete department ${department.code}?`,
                 onConfirm: async () => {
-                  await toast.promise(api.delete(`/departments/${department.id}`), {
-                    loading: 'Deleting...',
-                    success: `Deleted department ${department.name}`,
-                    error: `Failed to delete user ${department.name}`,
-                  });
+                  await toast.promise(
+                    api.delete(`/departments/${department.id}`),
+                    {
+                      loading: 'Deleting...',
+                      success: `Deleted department ${department.name}`,
+                      error: `Failed to delete user ${department.name}`,
+                    }
+                  );
                   refetch();
                 },
               });
@@ -137,7 +142,9 @@ export default function DepartmentList() {
             data={departments}
             keyField="id"
             isLoading={isLoading}
-            onRowClick={(department) => navigate("/admin/departments/" + department.id)}
+            onRowClick={(department) =>
+              navigate('/admin/departments/' + department.id)
+            }
           />
         </Card>
         <Pagination

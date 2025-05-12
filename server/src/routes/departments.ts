@@ -10,7 +10,7 @@ router.get("/", verifyToken, GET);
 router.get("/:id", verifyToken, GET_BY_ID);
 router.post("/", verifyToken, hasRole('Admin'), POST);
 router.post("/:id/restore", verifyToken, hasRole('Admin'), handleRestore);
-router.put("/", verifyToken, hasRole('Admin'), PUT);
+router.put("/:id", verifyToken, hasRole('Admin'), PUT);
 router.delete("/", verifyToken, hasRole('Admin'), DELETE);
 
 export default router;

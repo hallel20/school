@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req: Request, res: Response) {
     try {
-        const { page = 1, pageSize = 20, queryType, search = '' } = req.query;
+        const { page = 1, pageSize = 20, queryType, search = '', facultyId } = req.query;
         const pageNumber = Number(page);
         const pageSizeNumber = Number(pageSize);
         const where: any = {
@@ -27,12 +27,15 @@ export async function GET(req: Request, res: Response) {
         if (queryType === 'withStaffs') {
             where.staffs = { some: {} };
         }
+        if (facultyId) {
+            where.facultyId = Number(facultyId);
+        }
         const includeOptions = {
             courses: queryType === 'withCourses' || queryType === 'all',
             students: (queryType === 'withStudents' || queryType === 'all') && { include: { user: true } },
             staffs: (queryType === 'withStaffs' || queryType === 'all') && { include: { user: true } },
             faculty: true,
-            hod: true,
+            HOD: true,
         };
         const departments = await prisma.department.findMany({
             include: queryType === 'all' ||
@@ -47,6 +50,31 @@ export async function GET(req: Request, res: Response) {
                 id: 'desc',
             },
         });
+
+        const headOfDepartments = await prisma.staff.findMany({
+            where: {
+                departmentId: {
+                    in: departments.map(department => department.id),
+                },
+            },
+            include: {
+                user: true,
+            },
+        });
+
+        departments.forEach(department => {
+            const headOfDepartment = headOfDepartments.find(head => head.departmentId === department.id);
+            if (headOfDepartment) {
+                (department as any).hod = {
+                    id: headOfDepartment.id,
+                    firstName: headOfDepartment.firstName,
+                    lastName: headOfDepartment.lastName,
+                    email: headOfDepartment.user?.email,
+                    role: headOfDepartment.user?.role,
+                };
+            }
+        })
+
         const allDepartmentsCount = await prisma.department.count({
             where,
         });
@@ -65,13 +93,27 @@ export async function GET(req: Request, res: Response) {
     }
 }
 export async function POST(req: Request, res: Response) {
-    const { name, code, facultyId } = req.body;
+    const { name, code, facultyId, hodId } = req.body;
+
+    const existingDepartment = await prisma.department.findUnique({
+        where: { code },
+    });
+
+    if (existingDepartment) {
+        return res.status(400).json({ message: 'Department with this code already exists.' });
+    }
+
+    if (!name || !code || !facultyId) {
+        return res.status(400).json({ message: 'Name, code, and facultyId are required.' });
+    }
+
     try {
         const department = await prisma.department.create({
             data: {
                 name,
                 code,
-                facultyId
+                facultyId,
+                hodId: hodId ? Number(hodId) : null,
             },
         });
         res.status(201).json(department);
@@ -83,12 +125,25 @@ export async function POST(req: Request, res: Response) {
 
 export async function PUT(req: Request, res: Response) {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, code, facultyId, hodId } = req.body;
+
+    const existingDepartment = await prisma.department.findUnique({
+        where: { code },
+    });
+
+    if (existingDepartment && existingDepartment.id !== Number(id)) {
+        return res.status(400).json({ message: 'Department with this code already exists.' });
+    }
+
+
     try {
         const department = await prisma.department.update({
             where: { id: Number(id) },
             data: {
                 name,
+                code,
+                hodId: hodId ? Number(hodId) : null,
+                facultyId: facultyId ? Number(facultyId) : undefined,
             },
         });
         res.status(200).json(department);

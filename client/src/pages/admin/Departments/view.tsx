@@ -6,6 +6,7 @@ import Spinner from '@/components/ui/Spinner';
 import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
 import AdminNotFound from '@/components/AdminNotFound';
+import Card from '@/components/ui/Card';
 
 export default function ViewDepartment() {
   const { id } = useParams();
@@ -31,7 +32,7 @@ export default function ViewDepartment() {
     );
 
   return (
-    <div>
+    <div className="px-4 py-6">
       <PageHeader
         title={department?.name || 'Department Details'}
         actions={
@@ -43,7 +44,7 @@ export default function ViewDepartment() {
           </Button>
         }
       />
-      {department && <DepartmentDetails department={department} />}
+      <Card>{department && <DepartmentDetails department={department} />}</Card>
     </div>
   );
 }

@@ -16,6 +16,7 @@ export type User = {
     student: Student | null;
     staff: Staff | null;
     staffId: number | null;
+    facultyId: number | null
 }
 
 export type Student = {

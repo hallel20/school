@@ -12,10 +12,7 @@ import useFetch from '@/hooks/useFetch';
 // Define the Zod schema for user fields
 const baseUserSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
-  password: z
-    .string()
-    .min(6, { message: 'Password must be at least 6 characters' })
-    .optional(),
+  password: z.string().optional(),
   role: z.enum(['Student', 'Staff', 'Admin'], {
     // Keep role as required
     errorMap: () => ({ message: 'Please select a role' }),
@@ -126,10 +123,7 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
       firstName: user?.staff?.firstName || user?.student?.firstName || '',
       lastName: user?.staff?.lastName || user?.student?.lastName || '',
       position: user?.staff?.position || 'lecturer', // Default position for staff
-      facultyId:
-        user?.staff?.department?.facultyId ||
-        user?.student?.department?.facultyId ||
-        null,
+      facultyId: user?.facultyId || null,
       update: !!user, // Set to true if user is provided (edit mode)
       departmentId:
         user?.staff?.departmentId || user?.student?.departmentId || null,
