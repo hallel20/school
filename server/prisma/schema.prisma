@@ -71,7 +71,7 @@ model Department {
   facultyId Int
   courses   Course[]
   students  Student[]
-  staff     Staff[]
+  staffs     Staff[]
 }
 
 model Course {
