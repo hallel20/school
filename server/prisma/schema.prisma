@@ -24,35 +24,67 @@ model User {
 }
 
 model Student {
-  id        Int      @id @default(autoincrement())
-  user      User?
-  userId    Int?     @unique
-  studentId String   @unique // Unique student identifier
-  firstName String
-  lastName  String
-  courses   Course[] @relation("StudentCourses")
-  results   Result[]
+  id           Int        @id @default(autoincrement())
+  user         User?
+  userId       Int?       @unique
+  studentId    String     @unique // Unique student identifier
+  firstName    String
+  lastName     String
+  courses      Course[]   @relation("StudentCourses")
+  results      Result[]
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId Int
+}
+
+enum StaffPosition {
+  lecturer
+  assistant
+  professor
+  doctor
 }
 
 model Staff {
-  id              Int      @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   user            User?
-  userId          Int?     @unique
-  staffId         String   @unique // Unique staff identifier
+  userId          Int?          @unique
+  staffId         String        @unique // Unique staff identifier
   firstName       String
   lastName        String
+  position        StaffPosition
+  department      Department    @relation(fields: [departmentId], references: [id])
+  departmentId    Int // Default to a specific department
   assignedCourses Course[]
 }
 
+model Faculty {
+  id          Int          @id @default(autoincrement())
+  name        String
+  code        String       @unique
+  departments Department[]
+}
+
+model Department {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  code      String    @unique
+  faculty   Faculty   @relation(fields: [facultyId], references: [id])
+  facultyId Int
+  courses   Course[]
+  students  Student[]
+  staff     Staff[]
+}
+
 model Course {
-  id         Int       @id @default(autoincrement())
-  name       String
-  code       String    @unique
-  credits    Int
-  lecturer   Staff?    @relation(fields: [lecturerId], references: [id])
-  lecturerId Int?
-  students   Student[] @relation("StudentCourses")
-  results    Result[]
+  id           Int        @id @default(autoincrement())
+  name         String
+  code         String     @unique
+  credits      Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId Int
+  lecturer     Staff?     @relation(fields: [lecturerId], references: [id])
+  lecturerId   Int?
+  students     Student[]  @relation("StudentCourses")
+  results      Result[]
 }
 
 model Result {
