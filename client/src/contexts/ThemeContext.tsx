@@ -16,17 +16,29 @@ interface ThemeProviderProps {
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme');
-    return (savedTheme as Theme) || 'light';
+    if (savedTheme) {
+      return savedTheme as Theme;
+    }
+    // Check system preference if no theme is in localStorage
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    ) {
+      return 'dark';
+    }
+    return 'light'; // Default to light if system preference is not dark or not available
   });
 
   // Apply theme to body element
   useEffect(() => {
-    const body = document.body;
+    const root = window.document.documentElement; // Apply to <html> for Tailwind
 
     if (theme === 'dark') {
-      body.classList.add('dark');
+      root.classList.add('dark');
+      root.classList.remove('light'); // Ensure light class is removed
     } else {
-      body.classList.remove('dark');
+      root.classList.remove('dark');
+      root.classList.add('light'); // Ensure light class is added (or remove if not needed)
     }
 
     // Save to localStorage
@@ -37,19 +49,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  // useEffect(() => {
-  //   const savedTheme = localStorage.getItem('theme') as Theme;
-
-  //   if (savedTheme) {
-  //     setTheme(savedTheme); // Use the theme from localStorage if available.
-  //   } else {
-  //     // Otherwise, use the system preference.
-  //     const prefersDarkMode = window.matchMedia(
-  //       '(prefers-color-scheme: dark)'
-  //     ).matches;
-  //     setTheme(prefersDarkMode ? 'dark' : 'light');
-  //   }
-  // }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
