@@ -18,7 +18,7 @@ interface FacultyResponse {
   page: number;
   pageSize: number;
   totalPages: number;
-  totalFacultys: number;
+  totalfaculties: number;
 }
 
 export default function FacultyList() {
@@ -53,9 +53,11 @@ export default function FacultyList() {
     { header: 'Code', accessor: 'code' },
     { header: 'Faculty Name', accessor: 'name' },
     {
-      header: 'HOD',
+      header: 'Dean',
       accessor: (department: Faculty) =>
-        department.dean?.firstName + ' ' + department.dean?.lastName,
+        department.dean?.firstName ||
+        'Not' + ' ' + department.dean?.lastName ||
+        'Selected',
     },
     {
       header: 'Actions',
@@ -84,11 +86,14 @@ export default function FacultyList() {
                 title: 'Delete Faculty',
                 message: `Are you sure you want to delete department ${department.code}?`,
                 onConfirm: async () => {
-                  await toast.promise(api.delete(`/faculties/${department.id}`), {
-                    loading: 'Deleting...',
-                    success: `Deleted department ${department.name}`,
-                    error: `Failed to delete user ${department.name}`,
-                  });
+                  await toast.promise(
+                    api.delete(`/faculties/${department.id}`),
+                    {
+                      loading: 'Deleting...',
+                      success: `Deleted department ${department.name}`,
+                      error: `Failed to delete user ${department.name}`,
+                    }
+                  );
                   refetch();
                 },
               });
@@ -137,7 +142,9 @@ export default function FacultyList() {
             data={faculties}
             keyField="id"
             isLoading={isLoading}
-            onRowClick={(department) => navigate("/admin/faculties/" + department.id)}
+            onRowClick={(department) =>
+              navigate('/admin/faculties/' + department.id)
+            }
           />
         </Card>
         <Pagination

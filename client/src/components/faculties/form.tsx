@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { Faculty } from '../../types';
-import type { User } from '../../types'; // Assuming Staff type is also in types
+import type { Staff } from '../../types'; // Assuming Staff type is also in types
 import CustomSelect from '../ui/ReSelect';
 
 // Define the Zod schema for Faculty fields
@@ -49,7 +49,7 @@ const FacultyForm: React.FC<FacultyFormProps> = ({ faculty }) => {
     },
   });
 
-  const [staffList, setStaffList] = useState<User[]>([]);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // For disabling button during submission
   const [submitError, setSubmitError] = useState<string | null>(null); // For displaying submission errors
 
@@ -57,10 +57,8 @@ const FacultyForm: React.FC<FacultyFormProps> = ({ faculty }) => {
     // Fetch staff list for the Dean dropdown
     const fetchStaff = async () => {
       try {
-        const response = await api.get(
-          '/users?role=staff&faculty=' + faculty?.id
-        ); // Adjust endpoint as necessary
-        setStaffList(response.data.users || response.data || []); // Adjust based on your API response structure
+        const response = await api.get(`/staff?faculty=${faculty?.id}`); // Adjust endpoint as necessary
+        setStaffList(response.data.staff || response.data || []); // Adjust based on your API response structure
       } catch (error) {
         console.error('Failed to fetch staff:', error);
         toast.error('Failed to load staff for Dean selection.');
@@ -185,9 +183,9 @@ const FacultyForm: React.FC<FacultyFormProps> = ({ faculty }) => {
             <CustomSelect
               value={
                 staffList
-                  .map((user) => ({
-                    value: String(user.id),
-                    label: `${user.staff?.firstName} ${user.staff?.lastName}`,
+                  .map((staff) => ({
+                    value: String(staff.id),
+                    label: `${staff?.firstName} ${staff?.lastName}`,
                   }))
                   .find((option) => option.value === String(deanId)) || null
               }
@@ -196,9 +194,9 @@ const FacultyForm: React.FC<FacultyFormProps> = ({ faculty }) => {
               }}
               options={[
                 { value: '', label: 'Select a Dean (Optional)' }, // Default empty option
-                ...staffList.map((user) => ({
-                  value: String(user.staff?.id),
-                  label: `${user.staff?.firstName} ${user.staff?.lastName}`,
+                ...staffList.map((staff) => ({
+                  value: String(staff.id),
+                  label: `${staff.firstName} ${staff.lastName}`,
                 })),
               ]}
             />

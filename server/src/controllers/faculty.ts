@@ -22,6 +22,7 @@ export async function GET(req: Request, res: Response) {
                         isDeleted: false,
                     },
                 },
+                dean: true
             },
         });
         const allFacultiesCount = await prisma.faculty.count({
@@ -88,13 +89,14 @@ export async function POST(req: Request, res: Response) {
 }
 export async function PUT(req: Request, res: Response) {
     const { id } = req.params;
-    const { name, code } = req.body;
+    const { name, code, deanId } = req.body;
     try {
         const faculty = await prisma.faculty.update({
             where: { id: Number(id) },
             data: {
                 name,
                 code,
+                deanId: deanId ? Number(deanId) : undefined,
             },
         });
         res.status(200).json(faculty);

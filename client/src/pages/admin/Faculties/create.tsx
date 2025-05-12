@@ -17,7 +17,7 @@ export default function CreateFaculty() {
             variant="secondary"
             onClick={() => navigate('/admin/faculties')}
           >
-            Back to Facultys
+            Back to faculties
           </Button>
         }
       />
