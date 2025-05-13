@@ -37,6 +37,8 @@ const Sidebar = ({ role }: SidebarProps) => {
   const adminNavItems: NavItem[] = [
     { title: 'Dashboard', path: '/admin', icon: <BarChart size={16} /> },
     { title: 'Users', path: '/admin/users', icon: <Users size={16} /> },
+    { title: 'Staff', path: '/admin/staff', icon: <Users size={16} /> },
+    { title: 'Students', path: '/admin/students', icon: <Users size={16} /> },
     { title: 'Courses', path: '/admin/courses', icon: <BookOpen size={16} /> },
     {
       title: 'Departments',

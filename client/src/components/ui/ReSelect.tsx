@@ -4,7 +4,7 @@ import React from 'react';
 import Select, { StylesConfig } from 'react-select';
 
 // ... options and Option interface
-interface Option {
+export interface Option {
   value: string;
   label: string;
 }
@@ -19,6 +19,8 @@ interface CustomSelectProps {
   inputId?: string;
   className?: string;
   defaultValue?: Option;
+  isClearable?: boolean;
+  placeholder?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = (props) => {
