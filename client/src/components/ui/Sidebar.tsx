@@ -109,7 +109,7 @@ const Sidebar = ({ role }: SidebarProps) => {
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 h-screen transition-all duration-300 shadow-md flex flex-col ${
+      className={`bg-green-800 dark:bg-gray-800 h-screen transition-all duration-300 shadow-md flex flex-col ${
         collapsed ? 'w-16' : 'w-56' // Reduced width
       }`}
     >
@@ -117,17 +117,17 @@ const Sidebar = ({ role }: SidebarProps) => {
       <div className="flex items-center p-3 border-b border-gray-200 dark:border-gray-700">
         {' '}
         {/* Reduced padding */}
-        <School size={18} className="text-blue-600 dark:text-blue-400" />{' '}
+        <School size={18} className="text-blue-400 dark:text-blue-400" />{' '}
         {/* Reduced icon size */}
         {!collapsed && (
-          <span className="ml-1.5 text-base font-semibold dark:text-white">
+          <span className="ml-1.5 text-base font-semibold text-white">
             {' '}
             {/* Reduced margin and text size */}
             School Portal
           </span>
         )}
         <button
-          className="ml-auto text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="ml-auto text-gray-400 hover:text-gray-200"
           onClick={() => setCollapsed(!collapsed)}
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}{' '}
@@ -152,7 +152,7 @@ const Sidebar = ({ role }: SidebarProps) => {
                     // Reduced padding
                     isActive
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      : 'text-white hover:bg-gray-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`
                 }
               >
@@ -172,7 +172,7 @@ const Sidebar = ({ role }: SidebarProps) => {
         {' '}
         {/* Reduced padding and spacing */}
         <button
-          className="flex items-center w-full p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" // Reduced padding
+          className="flex items-center w-full p-1.5 rounded-lg text-gray-300 dark:hover:bg-gray-700 hover:bg-green-700" // Reduced padding
           onClick={toggleTheme}
         >
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}{' '}
@@ -186,7 +186,7 @@ const Sidebar = ({ role }: SidebarProps) => {
           )}
         </button>
         <button
-          className="flex items-center w-full p-1.5 rounded-lg text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900" // Reduced padding
+          className="flex items-center w-full p-1.5 rounded-lg text-red-400 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900" // Reduced padding
           onClick={handleLogout}
         >
           <LogOut size={16} /> {/* Reduced icon size */}
