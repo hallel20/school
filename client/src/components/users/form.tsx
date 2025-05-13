@@ -180,7 +180,10 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
   }, [watchedRole]);
 
   useEffect(() => {
-    setValue('departmentId', user?.staff?.departmentId || user?.student?.departmentId || null); // Reset department when faculty changes
+    setValue(
+      'departmentId',
+      user?.staff?.departmentId || user?.student?.departmentId || null
+    ); // Reset department when faculty changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedFacultyId]);
 
@@ -499,30 +502,34 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
           )}
         </div>
 
-        {accountType === 'student' && (
-          <div className="p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              Next available Student ID will be automatically assigned upon
-              creation
-            </p>
-          </div>
-        )}
+        {!user && (
+          <div>
+            {accountType === 'student' && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Next available Student ID will be automatically assigned upon
+                  creation
+                </p>
+              </div>
+            )}
 
-        {accountType === 'staff' && (
-          <div className="p-3 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md">
-            <p className="text-sm text-green-700 dark:text-green-300">
-              Next available Staff ID This will be automatically assigned upon
-              creation
-            </p>
-          </div>
-        )}
+            {accountType === 'staff' && (
+              <div className="p-3 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Next available Staff ID This will be automatically assigned
+                  upon creation
+                </p>
+              </div>
+            )}
 
-        {accountType === 'admin' && (
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Admin accounts do not have an automatically assigned Student/Staff
-              ID.
-            </p>
+            {accountType === 'admin' && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Admin accounts do not have an automatically assigned
+                  Student/Staff ID.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

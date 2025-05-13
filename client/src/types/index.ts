@@ -47,7 +47,24 @@ export type Course = {
     credits: number;
     students: Student[];
     lecturer: Staff;
+    departmentId: number;
+    department: Department;
+    results: Result[];
+    lecturerId: number;
+    createdAt: string;
+    updatedAt: string;
 };
+
+
+export type Result = {
+    id: number;
+    studentId: number;
+    courseId: number;
+    score: number;
+    student: Student;
+    course: Course;
+}
+
 
 export type Department = {
     id: number;
