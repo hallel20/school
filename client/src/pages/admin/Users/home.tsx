@@ -197,32 +197,34 @@ const UsersList = () => {
               onChange={handleSearchChange}
             />
           </div>
-          <div className="w-full">
-            <Select
-              label="Filter by Role"
-              value={roleFilter}
-              onChange={(e) => handleRoleFilterChange(e.target.value)}
-              options={[
-                { label: 'All Roles', value: '' },
-                { label: 'Admin', value: 'Admin' },
-                { label: 'Staff', value: 'Staff' },
-                { label: 'Student', value: 'Student' },
-              ]}
-            />
-          </div>
-          <div className="w-full md:ml-auto md:w-auto lg:col-start-3">
-            <Select
-              label="Page Size"
-              value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              options={[
-                { label: '5', value: 5 },
-                { label: '10', value: 10 },
-                { label: '20', value: 20 },
-                { label: '50', value: 50 },
-                { label: '100', value: 100 },
-              ]}
-            />
+          <div className="flex gap-3">
+            <div className="w-full">
+              <Select
+                label="Filter by Role"
+                value={roleFilter}
+                onChange={(e) => handleRoleFilterChange(e.target.value)}
+                options={[
+                  { label: 'All Roles', value: '' },
+                  { label: 'Admin', value: 'Admin' },
+                  { label: 'Staff', value: 'Staff' },
+                  { label: 'Student', value: 'Student' },
+                ]}
+              />
+            </div>
+            <div className="w-full md:ml-auto md:w-auto lg:col-start-3">
+              <Select
+                label="Page Size"
+                value={pageSize}
+                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                options={[
+                  { label: '5', value: 5 },
+                  { label: '10', value: 10 },
+                  { label: '20', value: 20 },
+                  { label: '50', value: 50 },
+                  { label: '100', value: 100 },
+                ]}
+              />
+            </div>
           </div>
         </div>
         <Table
