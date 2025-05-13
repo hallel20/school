@@ -24,18 +24,19 @@ model User {
 }
 
 model Student {
-  id           Int        @id @default(autoincrement())
-  user         User?
-  userId       Int?       @unique
-  studentId    String     @unique // Unique student identifier
-  firstName    String
-  lastName     String
-  courses      Course[]   @relation("StudentCourses")
-  results      Result[]
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId Int
-  isDeleted    Boolean    @default(false)
-  createdAt    DateTime   @default(now())
+  id            Int            @id @default(autoincrement())
+  user          User?
+  userId        Int?           @unique
+  studentId     String         @unique // Unique student identifier
+  firstName     String
+  lastName      String
+  courses       Course[]       @relation("StudentCourses")
+  results       Result[]
+  department    Department     @relation(fields: [departmentId], references: [id])
+  departmentId  Int
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  registrations Registration[]
 }
 
 enum StaffPosition {
@@ -67,11 +68,11 @@ model Faculty {
   name        String
   code        String       @unique
   dean        Dean?
-  deanId      Int?        @unique
+  deanId      Int?         @unique
   departments Department[]
   isDeleted   Boolean      @default(false)
   createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
 }
 
 model Dean {
@@ -109,18 +110,32 @@ model Department {
 }
 
 model Course {
-  id           Int        @id @default(autoincrement())
-  name         String
-  code         String     @unique
-  credits      Int
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId Int
-  lecturer     Staff?     @relation(fields: [lecturerId], references: [id])
-  lecturerId   Int?
-  students     Student[]  @relation("StudentCourses")
-  results      Result[]
-  isDeleted    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
+  id            Int            @id @default(autoincrement())
+  name          String
+  code          String         @unique
+  credits       Int
+  department    Department     @relation(fields: [departmentId], references: [id])
+  departmentId  Int
+  lecturer      Staff?         @relation(fields: [lecturerId], references: [id])
+  lecturerId    Int?
+  students      Student[]      @relation("StudentCourses")
+  results       Result[]
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  registrations Registration[]
+}
+
+model Registration {
+  id                String          @id
+  student           Student         @relation(fields: [studentId], references: [id])
+  studentId         Int
+  courses           Course[]
+  academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
+  academicSessionId Int
+  semester          Semester        @relation(fields: [semesterId], references: [id])
+  semesterId        Int
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 }
 
 model Result {
@@ -145,6 +160,7 @@ model AcademicSession {
   semesters     Semester[]
   results       Result[]
   schoolSetting SchoolSetting?
+  registrations Registration[]
 }
 
 model Semester {
@@ -153,6 +169,7 @@ model Semester {
   academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
   academicSessionId Int
   results           Result[]
+  registrations     Registration[]
 
   @@unique([academicSessionId, name])
 }
