@@ -16,6 +16,9 @@ interface CustomSelectProps {
   onBlur?: () => void;
   isDisabled?: boolean;
   isLoading?: boolean;
+  inputId?: string;
+  className?: string;
+  defaultValue?: Option;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = (props) => {
