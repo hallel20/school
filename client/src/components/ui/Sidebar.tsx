@@ -110,7 +110,7 @@ const Sidebar = ({ role }: SidebarProps) => {
   return (
     <div
       className={`bg-white dark:bg-gray-800 h-screen transition-all duration-300 shadow-md flex flex-col ${
-        collapsed ? 'w-14' : 'w-44' // Reduced width
+        collapsed ? 'w-16' : 'w-56' // Reduced width
       }`}
     >
       {/* Header */}
@@ -139,7 +139,7 @@ const Sidebar = ({ role }: SidebarProps) => {
       <nav className="flex-1 overflow-y-auto py-2.5">
         {' '}
         {/* Reduced vertical padding */}
-        <ul className="space-y-1 px-2">
+        <ul className="space-y-1 px-4">
           {' '}
           {/* Reduced spacing and horizontal padding */}
           {getNavItems().map((item) => (
