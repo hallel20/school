@@ -18,7 +18,7 @@ const userValidation = [
 // Get all users - Admin only
 router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Response) => {
   try {
-    const { page = 1, pageSize = 20, role } = req.query;
+    const { page = 1, pageSize = 20, role, search = '' } = req.query;
     const pageNumber = Number(page);
     const pageSizeNumber = Number(pageSize);
     const where: any = {
@@ -29,6 +29,15 @@ router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Respons
       where.role = role as string;
     }
 
+    if (search) {
+      where.OR = [
+        { email: { contains: search as string } },
+        { student: { firstName: { contains: search as string } } },
+        { student: { lastName: { contains: search as string } } },
+        { staff: { firstName: { contains: search as string } } },
+        { staff: { lastName: { contains: search as string } } },
+      ];
+    }
     const users = await prisma.user.findMany({
       where,
       include: {

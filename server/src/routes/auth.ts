@@ -20,7 +20,7 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email, isDeleted: false },
       include: {
         student: true,
         staff: true

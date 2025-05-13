@@ -16,14 +16,43 @@ const courseValidation = [
 // Get all courses
 router.get('/', verifyToken, async (req: Request, res: Response) => {
   try {
-    const { page = 1, pageSize = 20 } = req.query;
+    const { page = 1, pageSize = 20, facultyId, departmentId, search = '' } = req.query;
     const pageNumber = Number(page);
     const pageSizeNumber = Number(pageSize);
+    const where: any = {}
+
+    if (facultyId && facultyId !== "undefined") {
+      const departments = await prisma.department.findMany({
+        where: {
+          isDeleted: false,
+          facultyId: facultyId ? Number(facultyId) : undefined,
+        },
+      })
+      const departmentIds = departments.map((department) => department.id);
+      where.departmentId = {
+        in: departmentIds,
+      };
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search as string } },
+        {
+          code: { contains: search as string }
+        },
+      ];
+    }
+
+    if (departmentId && departmentId !== "undefined") {
+      where.departmentId = Number(departmentId);
+    }
 
     const courses = await prisma.course.findMany({
       include: {
         lecturer: true,
+        department: true
       },
+      where,
       take: pageSizeNumber,
       skip: (pageNumber - 1) * pageSizeNumber,
     });
