@@ -20,6 +20,9 @@ export default function ViewCourse({ course, onClose, open }: ViewCourseProps) {
           <p>
             <strong>Credits:</strong> {course.credits}
           </p>
+          <p>
+            <strong>Department:</strong> {course.department?.name}
+          </p>
         </div>
         <Link
           to={`/admin/courses/edit/${course.id}`}
