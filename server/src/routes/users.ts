@@ -209,7 +209,12 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
     const nextUserIds = await prisma.nextId.findMany()
     const nextStudent = nextUserIds.find((user) => user.tableName === 'student')?.nextId || 1;
     const nextStaff = nextUserIds.find((user) => user.tableName === 'staff')?.nextId || 1;
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const password = req.body.password
+    const passwordInput: any = {}
+    if (password) {
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
+      passwordInput.password = hashedPassword;
+    }
 
     const existingUser = await prisma.user.findUnique({
       where: { id: parseInt(req.params.id) },
@@ -239,12 +244,13 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
         data: {
           email,
           role,
-          ...(req.body.password && { password: hashedPassword }),
+          ...passwordInput,
           ...(role === 'Student' && {
             student: {
               update: {
                 firstName,
-                lastName
+                lastName,
+                departmentId,
               }
             }
           }),
@@ -252,7 +258,8 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
             staff: {
               update: {
                 firstName,
-                lastName
+                lastName,
+                departmentId,
               }
             }
           })
@@ -268,7 +275,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
         data: {
           email,
           role,
-          ...(req.body.password && { password: hashedPassword }),
+          ...passwordInput,
           ...(role === 'Student' && {
             student: {
               create: {

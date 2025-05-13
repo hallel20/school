@@ -12,6 +12,7 @@ import adminRoutes from './routes/admin';
 import departmentRoutes from './routes/departments';
 import facultyRoutes from './routes/faculties';
 import staffRoutes from './routes/staff';
+import studentRoutes from './routes/students';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import fs from 'fs';
@@ -65,6 +66,8 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/departments', departmentRoutes);
 app.use('/api/faculties', facultyRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/students', studentRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 

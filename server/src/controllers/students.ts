@@ -31,7 +31,7 @@ export const GET = async (req: Request, res: Response) => {
         const pageNumber = Number(page);
         const pageSizeNumber = Number(pageSize);
 
-        const staff = await prisma.staff.findMany({
+        const students = await prisma.student.findMany({
             include: {
                 user: true,
             },
@@ -40,15 +40,15 @@ export const GET = async (req: Request, res: Response) => {
             skip: (pageNumber - 1) * pageSizeNumber,
         });
 
-        const allStaffCount = await prisma.staff.count();
-        const totalPages = Math.ceil(allStaffCount / pageSizeNumber);
+        const allStudentCount = await prisma.student.count();
+        const totalPages = Math.ceil(allStudentCount / pageSizeNumber);
 
         const response = {
-            staff,
+            students,
             page: pageNumber,
             pageSize: pageSizeNumber,
             totalPages,
-            totalStaff: allStaffCount,
+            totalStudent: allStudentCount,
         };
 
         res.send(response);
@@ -59,16 +59,16 @@ export const GET = async (req: Request, res: Response) => {
 }
 export const GET_BY_ID = async (req: Request, res: Response) => {
     try {
-        const staff = await prisma.staff.findUnique({
+        const student = await prisma.student.findUnique({
             where: { id: parseInt(req.params.id) },
             include: {
                 user: true,
             },
         });
-        if (!staff) {
-            return res.status(404).send({ message: "Staff not found" });
+        if (!student) {
+            return res.status(404).send({ message: "Student not found" });
         }
-        res.send(staff);
+        res.send(student);
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Server error" });
@@ -77,7 +77,7 @@ export const GET_BY_ID = async (req: Request, res: Response) => {
 export const POST = async (req: Request, res: Response) => {
     try {
         const { userId, departmentId } = req.body;
-        const staff = await prisma.staff.create({
+        const student = await prisma.student.create({
             //@ts-ignore
             data: {
                 user: {
@@ -88,7 +88,7 @@ export const POST = async (req: Request, res: Response) => {
                 },
             },
         });
-        res.status(201).send(staff);
+        res.status(201).send(student);
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Server error" });
@@ -97,7 +97,7 @@ export const POST = async (req: Request, res: Response) => {
 export const PUT = async (req: Request, res: Response) => {
     try {
         const { userId, departmentId } = req.body;
-        const staff = await prisma.staff.update({
+        const student = await prisma.student.update({
             where: { id: parseInt(req.params.id) },
             data: {
                 user: {
@@ -108,7 +108,7 @@ export const PUT = async (req: Request, res: Response) => {
                 },
             },
         });
-        res.status(200).send(staff);
+        res.status(200).send(student);
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Server error" });
@@ -117,7 +117,7 @@ export const PUT = async (req: Request, res: Response) => {
 
 export const DELETE = async (req: Request, res: Response) => {
     try {
-        await prisma.staff.delete({
+        await prisma.student.delete({
             where: { id: parseInt(req.params.id) },
         });
         res.status(204).send();
@@ -128,7 +128,7 @@ export const DELETE = async (req: Request, res: Response) => {
 }
 export const RESTORE = async (req: Request, res: Response) => {
     try {
-        await prisma.staff.update({
+        await prisma.student.update({
             where: { id: parseInt(req.params.id) },
             data: { isDeleted: false },
         });
@@ -138,29 +138,31 @@ export const RESTORE = async (req: Request, res: Response) => {
         res.status(500).send({ message: "Server error" });
     }
 }
+
 export const handleRestore = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const staff = await prisma.staff.update({
+        const student = await prisma.student.update({
             where: { id: parseInt(id) },
             data: { isDeleted: false },
         });
-        res.status(200).send(staff);
+        res.status(200).send(student);
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Server error" });
     }
 }
-export const getStaffByDepartment = async (req: Request, res: Response) => {
+
+export const getStudentByDepartment = async (req: Request, res: Response) => {
     try {
         const { departmentId } = req.params;
-        const staff = await prisma.staff.findMany({
+        const student = await prisma.student.findMany({
             where: { departmentId: parseInt(departmentId) },
             include: {
                 user: true,
             },
         });
-        res.status(200).send(staff);
+        res.status(200).send(student);
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Server error" });
