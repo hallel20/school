@@ -25,6 +25,7 @@ export type Student = {
     firstName: string;
     lastName: string;
     userId: number | null;
+    user?: User
     departmentId: number | null;
     department?: Department | null;
 };

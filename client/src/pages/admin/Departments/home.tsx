@@ -6,12 +6,13 @@ import Card from '@/components/ui/Card';
 import { PlusCircle, Edit, Trash, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useFetch from '@/hooks/useFetch';
-import { Department } from '@/types';
+import { Department, Faculty } from '@/types'; // Added Faculty
 import Pagination from '@/components/ui/pagination';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // Added useEffect and useMemo
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import api from '@/services/api';
 import Select from '@/components/ui/Select';
+import CustomSelect, { Option } from '@/components/ui/ReSelect'; // Added CustomSelect and Option
 
 interface DepartmentResponse {
   departments: Department[];
@@ -21,14 +22,39 @@ interface DepartmentResponse {
   totalDepartments: number;
 }
 
+interface FacultyResponse {
+  faculties: Faculty[];
+}
+
 export default function DepartmentList() {
   const navigate = useNavigate();
-  const searchParams = useSearchParams();
-  const page = searchParams[0].get('page') || '1';
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Pagination state
+  const page = searchParams.get('page') || '1';
   const pageNumber = parseInt(page, 10);
-  const pageSizeParam = searchParams[0].get('pageSize') || '10';
+  const pageSizeParam = searchParams.get('pageSize') || '10';
   const pageSizeNumber = parseInt(pageSizeParam, 10);
   const [pageSize, setPageSize] = useState(pageSizeNumber);
+
+  // Filter state
+  const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(
+    searchParams.get('facultyId')
+  );
+
+  // Data fetching for faculty filter
+  const { data: facultyData, loading: facultiesLoading } =
+    useFetch<FacultyResponse>('/faculties');
+
+  // Construct departments API URL based on filters and pagination
+  const departmentsApiUrl = useMemo(() => {
+    let url = `/departments?page=${pageNumber}&pageSize=${pageSizeNumber}`;
+    if (selectedFacultyId) {
+      url += `&facultyId=${selectedFacultyId}`;
+    }
+    return url;
+  }, [pageNumber, pageSizeNumber, selectedFacultyId]);
+
   const {
     data: { departments, totalPages } = {
       departments: [],
@@ -36,17 +62,37 @@ export default function DepartmentList() {
     },
     loading: isLoading,
     refetch,
-  } = useFetch<DepartmentResponse>(
-    `/departments?page=${pageNumber}&pageSize=${pageSizeNumber}`
-  ); // Custom hook to fetch departments
+  } = useFetch<DepartmentResponse>(departmentsApiUrl);
   const { openDeleteConfirmation, DeleteModal } = useDeleteConfirmation();
 
+  // Update URL search params when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('page', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+    if (selectedFacultyId) params.set('facultyId', selectedFacultyId);
+    else params.delete('facultyId');
+
+    setSearchParams(params, { replace: true });
+  }, [pageNumber, pageSize, selectedFacultyId, setSearchParams]);
+
+  const facultyOptions: Option[] =
+    facultyData?.faculties.map((fac) => ({
+      value: fac.id.toString(),
+      label: fac.name,
+    })) || [];
+
   const handlePageChange = (page: number) => {
-    navigate(`/admin/departments?page=${page}&pageSize=${pageSize}`);
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page.toString());
+    setSearchParams(params);
   };
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    navigate(`/admin/departments?page=${page}&pageSize=${size}`);
+    const params = new URLSearchParams(searchParams);
+    params.set('page', '1'); // Reset to page 1 when page size changes
+    params.set('pageSize', size.toString());
+    setSearchParams(params);
   };
 
   const columns = [
@@ -55,9 +101,9 @@ export default function DepartmentList() {
     {
       header: 'HOD',
       accessor: (department: Department) =>
-        (department.hod?.firstName || 'Not') +
-        ' ' +
-        (department.hod?.lastName || 'Assigned'),
+        department.hod?.firstName && department.hod?.lastName
+          ? `${department.hod.firstName} ${department.hod.lastName}`
+          : 'Not Assigned',
     },
     {
       header: 'Actions',
@@ -106,6 +152,15 @@ export default function DepartmentList() {
     },
   ];
 
+  const handleFacultyChange = (option: Option | null) => {
+    setSelectedFacultyId(option ? option.value : null);
+    // URL will be updated by useEffect, which will also reset page to 1
+  };
+
+  const clearFilters = () => {
+    setSelectedFacultyId(null);
+  };
+
   return (
     <>
       <div className="px-4 py-6">
@@ -122,19 +177,55 @@ export default function DepartmentList() {
             </Button>
           }
         />
-        <div className="flex justify-end items-center gap-2 pb-3">
-          <Select
-            label="Page Size"
-            value={pageSize}
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-            options={[
-              { label: '5', value: 5 },
-              { label: '10', value: 10 },
-              { label: '20', value: 20 },
-              { label: '50', value: 50 },
-              { label: '100', value: 100 },
-            ]}
-          />
+        <div className="flex justify-between items-end gap-4 pb-4">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-4 pb-4">
+            <div>
+              <label
+                htmlFor="faculty-filter"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Filter by Faculty
+              </label>
+              <CustomSelect
+                inputId="faculty-filter"
+                options={facultyOptions}
+                value={
+                  facultyOptions.find(
+                    (opt) => opt.value === selectedFacultyId
+                  ) || null
+                }
+                onChange={handleFacultyChange}
+                isLoading={facultiesLoading}
+                isClearable
+                placeholder="Select Faculty..."
+              />
+            </div>
+            <div className="lg:col-start-3 flex items-end">
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="w-full md:w-auto mb-1 md:mb-0 mr-2"
+              >
+                Clear Filter
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-end justify-end">
+            {' '}
+            {/* Aligns page size to the right on larger screens */}
+            <Select
+              label="Page Size"
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              options={[
+                { label: '5', value: 5 },
+                { label: '10', value: 10 },
+                { label: '20', value: 20 },
+                { label: '50', value: 50 },
+                { label: '100', value: 100 },
+              ]}
+            />
+          </div>
         </div>
         <Card>
           <Table

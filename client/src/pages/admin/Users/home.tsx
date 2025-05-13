@@ -9,10 +9,12 @@ import toast from 'react-hot-toast';
 import useFetch from '@/hooks/useFetch';
 import { User } from '@/types';
 import { getUserName } from '@/utils';
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react'; // Added useMemo and useEffect
 import Pagination from '@/components/ui/pagination';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import api from '@/services/api';
+import Input from '@/components/ui/Input'; // Added Input
+import useDebounce from '@/hooks/useDebounce'; // Added useDebounce
 
 interface UsersResponse {
   users: User[];
@@ -24,45 +26,74 @@ interface UsersResponse {
 
 const UsersList = () => {
   const navigate = useNavigate();
-  const searchParams = useSearchParams();
-  const page = searchParams[0].get('page') || '1';
-  const pageNumber = parseInt(page, 10);
-  const pageSizeParam = searchParams[0].get('pageSize') || '10';
-  const pageSizeNumber = parseInt(pageSizeParam, 10);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [roleFilter, setRoleFilter] = useState('');
+  // Pagination and filter state from URL
+  const page = searchParams.get('page') || '1';
+  const pageNumber = parseInt(page, 10);
+  const pageSizeParam = searchParams.get('pageSize') || '10';
+  const pageSizeNumber = parseInt(pageSizeParam, 10);
   const [pageSize, setPageSize] = useState(pageSizeNumber);
+  const [roleFilter, setRoleFilter] = useState(searchParams.get('role') || '');
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get('search') || ''
+  );
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Construct API URL
+  const usersApiUrl = useMemo(() => {
+    let url = `/users?page=${pageNumber}&pageSize=${pageSizeNumber}`;
+    if (roleFilter) {
+      url += `&role=${roleFilter}`;
+    }
+    if (debouncedSearchTerm) {
+      url += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
+    }
+    return url;
+  }, [pageNumber, pageSizeNumber, roleFilter, debouncedSearchTerm]);
 
   const {
-    data,
+    data: usersData,
     loading: isLoading,
     refetch,
-  } = useFetch<UsersResponse>(
-    `/users?role=${roleFilter}&page=${pageNumber}&pageSize=${pageSizeNumber}`
-  );
+  } = useFetch<UsersResponse>(usersApiUrl);
 
   const { openDeleteConfirmation, DeleteModal } = useDeleteConfirmation();
 
-  const { users, totalPages } = data || {
+  const { users, totalPages } = usersData || {
     users: [],
-    page: 1,
-    pageSize: 10,
     totalPages: 0,
-    totalUsers: 0,
   };
 
+  // Update URL search params when filters or pagination change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('page', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+    if (roleFilter) params.set('role', roleFilter);
+    else params.delete('role');
+    if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
+    else params.delete('search');
+    setSearchParams(params, { replace: true });
+  }, [pageNumber, pageSize, roleFilter, debouncedSearchTerm, setSearchParams]);
+
   const handlePageChange = (page: number) => {
-    navigate(
-      `/admin/users?role=${roleFilter}&page=${page}&pageSize=${pageSize}`
-    );
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page.toString());
+    setSearchParams(params);
   };
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    navigate(`/admin/users?role=${roleFilter}&page=${page}&pageSize=${size}`);
+    const params = new URLSearchParams(searchParams);
+    params.set('page', '1'); // Reset to page 1
+    params.set('pageSize', size.toString());
+    setSearchParams(params);
   };
   const handleRoleFilterChange = (role: string) => {
     setRoleFilter(role);
-    navigate(`/admin/users?role=${role}&page=${page}&pageSize=${pageSize}`);
+    const params = new URLSearchParams(searchParams);
+    params.set('page', '1'); // Reset to page 1
+    setSearchParams(params);
   };
 
   const columns = [
@@ -124,6 +155,21 @@ const UsersList = () => {
     },
   ];
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Effect to reset to page 1 when debounced search term or role filter changes
+  useEffect(() => {
+    if (debouncedSearchTerm || roleFilter) {
+      // Only if a filter is active or search term exists
+      const params = new URLSearchParams(searchParams);
+      params.set('page', '1');
+      setSearchParams(params, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, roleFilter, setSearchParams]); // Removed searchParams to avoid loop
+
   return (
     <div className="px-4 py-6">
       <PageHeader
@@ -140,50 +186,59 @@ const UsersList = () => {
         }
       />
 
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-end items-center gap-2">
-          <Select
-            label="Role"
-            value={roleFilter}
-            onChange={(e) => handleRoleFilterChange(e.target.value)}
-            options={[
-              { label: 'All', value: '' },
-              { label: 'Admin', value: 'Admin' },
-              { label: 'Staff', value: 'Staff' },
-              { label: 'Student', value: 'Student' },
-            ]}
-          />
-          <Select
-            label="Page Size"
-            value={pageSize}
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-            options={[
-              { label: '5', value: 5 },
-              { label: '10', value: 10 },
-              { label: '20', value: 20 },
-              { label: '50', value: 50 },
-              { label: '100', value: 100 },
-            ]}
-          />
+      <Card>
+        <div className="flex flex-col md:flex-row items-end pb-4">
+          <div className="w-full">
+            <Input
+              id="user-search"
+              label="Search Users"
+              placeholder="Search by name, email..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <div className="w-full">
+            <Select
+              label="Filter by Role"
+              value={roleFilter}
+              onChange={(e) => handleRoleFilterChange(e.target.value)}
+              options={[
+                { label: 'All Roles', value: '' },
+                { label: 'Admin', value: 'Admin' },
+                { label: 'Staff', value: 'Staff' },
+                { label: 'Student', value: 'Student' },
+              ]}
+            />
+          </div>
+          <div className="w-full md:ml-auto md:w-auto lg:col-start-3">
+            <Select
+              label="Page Size"
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              options={[
+                { label: '5', value: 5 },
+                { label: '10', value: 10 },
+                { label: '20', value: 20 },
+                { label: '50', value: 50 },
+                { label: '100', value: 100 },
+              ]}
+            />
+          </div>
         </div>
-        <Card>
-          <Table
-            columns={columns}
-            data={users
-              ?.filter((user) => (roleFilter ? user.role === roleFilter : true))
-              .slice(0, pageSize)}
-            keyField="id"
-            isLoading={isLoading}
-            onRowClick={(user) => navigate(`/admin/users/view/${user.id}`)}
-          />
-          <Pagination
-            onPageChange={handlePageChange}
-            currentPage={pageNumber}
-            totalPages={totalPages}
-          />
-        </Card>
-        <DeleteModal />
-      </div>
+        <Table
+          columns={columns}
+          data={users} // Data is now pre-filtered and paginated by the server
+          keyField="id"
+          isLoading={isLoading}
+          onRowClick={(user) => navigate(`/admin/users/view/${user.id}`)}
+        />
+        <Pagination
+          onPageChange={handlePageChange}
+          currentPage={pageNumber}
+          totalPages={totalPages}
+        />
+      </Card>
+      <DeleteModal />
     </div>
   );
 };

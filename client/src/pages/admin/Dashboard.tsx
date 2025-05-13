@@ -10,6 +10,8 @@ const Users = lazy(() => import('./Users'));
 const Courses = lazy(() => import('./Courses'));
 const Departments = lazy(() => import('./Departments'));
 const Faculties = lazy(() => import('./Faculties'));
+const Staff = lazy(() => import('./Staff'));
+const Students = lazy(() => import('./Students'));
 // const Results = lazy(() => import('./Results'));
 const AcademicSessions = lazy(() => import('./AcademicSessions'));
 const Settings = lazy(() => import('./Settings'));
@@ -70,6 +72,8 @@ const AdminDashboard = () => {
             <Routes>
               <Route path="/" element={<Overview />} />
               <Route path="/users/*" element={<Users />} />
+              <Route path="/staff/*" element={<Staff />} />
+              <Route path="/students/*" element={<Students />} />
               <Route path="/courses/*" element={<Courses />} />
               <Route path="/faculties/*" element={<Faculties />} />
               <Route path="/departments/*" element={<Departments />} />
