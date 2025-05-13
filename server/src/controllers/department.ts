@@ -117,22 +117,24 @@ export async function POST(req: Request, res: Response) {
             },
         });
 
-        const HOD = await prisma.hOD.create({
-            data: {
-                staffId: hodId,
-                departmentId: department.id
-            }
-        })
-        department.hodId = HOD.id;
+        if (hodId) {
+            const HOD = await prisma.hOD.create({
+                data: {
+                    staffId: hodId,
+                    departmentId: department.id
+                }
+            })
+            department.hodId = HOD.id;
 
-        await prisma.department.update({
-            where: {
-                id: department.id
-            },
-            data: {
-                hodId: HOD.id
-            }
-        })
+            await prisma.department.update({
+                where: {
+                    id: department.id
+                },
+                data: {
+                    hodId: HOD.id
+                }
+            })
+        }
         res.status(201).json(department);
     } catch (error) {
         console.error(error);

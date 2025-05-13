@@ -26,6 +26,7 @@ dist-ssr
 
 # database
 db_backup.json
+database_export.json
 
 # lock files
 package-lock.json

@@ -16,6 +16,7 @@ import {
   BarChart,
   Building,
   ListChecks,
+  Building2,
 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -48,7 +49,7 @@ const Sidebar = ({ role }: SidebarProps) => {
     {
       title: 'Faculties',
       path: '/admin/faculties',
-      icon: <Building size={16} />,
+      icon: <Building2 size={16} />,
     },
     {
       title: 'Academic Sessions',

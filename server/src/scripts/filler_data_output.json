@@ -1,0 +1,835 @@
+{
+  "Course": [
+    {
+      "id": 1,
+      "name": "Computer Analysis",
+      "code": "CSE 191",
+      "credits": 3,
+      "departmentId": 1,
+      "lecturerId": 5,
+      "createdAt": "2025-05-13T10:26:16.126Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 2,
+      "name": "Advanced Mathematics",
+      "code": "CHEM001",
+      "credits": 3,
+      "departmentId": 1,
+      "lecturerId": 4,
+      "createdAt": "2024-01-19T13:38:15Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 3,
+      "name": "Advanced Chemistry",
+      "code": "HIST001",
+      "credits": 2,
+      "departmentId": 1,
+      "lecturerId": 8,
+      "createdAt": "2023-01-18T15:52:28Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 4,
+      "name": "Advanced Physics",
+      "code": "HIST002",
+      "credits": 3,
+      "departmentId": 1,
+      "lecturerId": 4,
+      "createdAt": "2023-12-17T15:31:08Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 5,
+      "name": "Advanced Biology",
+      "code": "PHY001",
+      "credits": 3,
+      "departmentId": 2,
+      "lecturerId": 8,
+      "createdAt": "2024-06-17T06:52:23Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 6,
+      "name": "Advanced Chemistry",
+      "code": "HIST003",
+      "credits": 3,
+      "departmentId": 2,
+      "lecturerId": 5,
+      "createdAt": "2023-03-16T05:44:13Z",
+      "isDeleted": 0
+    }
+  ],
+  "Registration": [
+    {
+      "id": "REG00001",
+      "studentId": 2,
+      "courses": [
+        6
+      ],
+      "academicSessionId": 2,
+      "semesterId": 4,
+      "createdAt": "2024-10-06T01:44:58Z",
+      "updatedAt": "2025-05-25T16:01:48Z"
+    },
+    {
+      "id": "REG00002",
+      "studentId": 1,
+      "courses": [
+        5
+      ],
+      "academicSessionId": 2,
+      "semesterId": 4,
+      "createdAt": "2023-09-17T02:35:04Z",
+      "updatedAt": "2024-06-18T02:20:21Z"
+    },
+    {
+      "id": "REG00003",
+      "studentId": 2,
+      "courses": [
+        1
+      ],
+      "academicSessionId": 1,
+      "semesterId": 2,
+      "createdAt": "2025-03-09T05:47:12Z",
+      "updatedAt": "2023-05-08T19:43:08Z"
+    },
+    {
+      "id": "REG00004",
+      "studentId": 1,
+      "courses": [
+        3
+      ],
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "createdAt": "2023-03-05T21:58:02Z",
+      "updatedAt": "2025-11-22T20:09:38Z"
+    },
+    {
+      "id": "REG00005",
+      "studentId": 1,
+      "courses": [
+        4
+      ],
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "createdAt": "2025-01-21T23:21:20Z",
+      "updatedAt": "2025-06-01T16:13:09Z"
+    },
+    {
+      "id": "REG00006",
+      "studentId": 2,
+      "courses": [
+        3
+      ],
+      "academicSessionId": 2,
+      "semesterId": 4,
+      "createdAt": "2023-01-15T07:03:02Z",
+      "updatedAt": "2024-05-01T21:21:35Z"
+    },
+    {
+      "id": "REG00007",
+      "studentId": 2,
+      "courses": [
+        6
+      ],
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "createdAt": "2024-09-07T01:37:27Z",
+      "updatedAt": "2024-01-26T02:59:16Z"
+    },
+    {
+      "id": "REG00008",
+      "studentId": 2,
+      "courses": [
+        6
+      ],
+      "academicSessionId": 1,
+      "semesterId": 2,
+      "createdAt": "2024-02-13T21:35:46Z",
+      "updatedAt": "2025-11-09T11:54:25Z"
+    },
+    {
+      "id": "REG00009",
+      "studentId": 1,
+      "courses": [
+        2
+      ],
+      "academicSessionId": 2,
+      "semesterId": 3,
+      "createdAt": "2024-09-21T10:37:01Z",
+      "updatedAt": "2025-01-28T06:25:54Z"
+    },
+    {
+      "id": "REG00010",
+      "studentId": 1,
+      "courses": [
+        1
+      ],
+      "academicSessionId": 2,
+      "semesterId": 4,
+      "createdAt": "2024-08-18T15:32:56Z",
+      "updatedAt": "2024-12-08T19:09:25Z"
+    }
+  ],
+  "HOD": [
+    {
+      "id": 1,
+      "staffId": 1,
+      "departmentId": 1,
+      "isDeleted": 0
+    },
+    {
+      "id": 2,
+      "staffId": 8,
+      "departmentId": 2,
+      "isDeleted": 0
+    }
+  ],
+  "NextId": [
+    {
+      "id": 1,
+      "tableName": "staff",
+      "nextId": 12
+    },
+    {
+      "id": 2,
+      "tableName": "student",
+      "nextId": 4
+    },
+    {
+      "id": 3,
+      "tableName": "Course",
+      "nextId": 1
+    },
+    {
+      "id": 4,
+      "tableName": "Registration",
+      "nextId": 1
+    },
+    {
+      "id": 5,
+      "tableName": "Hod",
+      "nextId": 1
+    },
+    {
+      "id": 6,
+      "tableName": "Department",
+      "nextId": 1
+    },
+    {
+      "id": 7,
+      "tableName": "Dean",
+      "nextId": 1
+    },
+    {
+      "id": 8,
+      "tableName": "Result",
+      "nextId": 1
+    },
+    {
+      "id": 9,
+      "tableName": "Semester",
+      "nextId": 1
+    },
+    {
+      "id": 10,
+      "tableName": "Notification",
+      "nextId": 1
+    },
+    {
+      "id": 11,
+      "tableName": "Faculty",
+      "nextId": 1
+    },
+    {
+      "id": 12,
+      "tableName": "Schoolsetting",
+      "nextId": 1
+    },
+    {
+      "id": 13,
+      "tableName": "Academicsession",
+      "nextId": 1
+    },
+    {
+      "id": 14,
+      "tableName": "User",
+      "nextId": 1
+    },
+    {
+      "id": 15,
+      "tableName": "Log",
+      "nextId": 1
+    }
+  ],
+  "Staff": [
+    {
+      "id": 1,
+      "userId": null,
+      "staffId": "STAFF00001",
+      "firstName": "Oreoluwa",
+      "lastName": "Hallel",
+      "position": "professor",
+      "departmentId": 1,
+      "createdAt": "2025-05-12T11:02:58.661Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 4,
+      "userId": null,
+      "staffId": "STAFF00002",
+      "firstName": "Oreoluwa",
+      "lastName": "Hallel",
+      "position": "professor",
+      "departmentId": 1,
+      "createdAt": "2025-05-12T11:08:19.673Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 5,
+      "userId": null,
+      "staffId": "STAFF00003",
+      "firstName": "Johnson",
+      "lastName": "Emmanuel",
+      "position": "doctor",
+      "departmentId": 1,
+      "createdAt": "2025-05-12T11:28:33.333Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 8,
+      "userId": null,
+      "staffId": "STAFF00004",
+      "firstName": "Teacher",
+      "lastName": "School",
+      "position": "lecturer",
+      "departmentId": 2,
+      "createdAt": "2025-05-12T11:31:15.267Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 9,
+      "userId": null,
+      "staffId": "STAFF001",
+      "firstName": "Eve",
+      "lastName": "Jones",
+      "position": "doctor",
+      "departmentId": 1,
+      "createdAt": "2025-02-06T16:19:04Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 10,
+      "userId": null,
+      "staffId": "STAFF002",
+      "firstName": "Alice",
+      "lastName": "Brown",
+      "position": "lecturer",
+      "departmentId": 1,
+      "createdAt": "2025-11-13T05:29:40Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 11,
+      "userId": null,
+      "staffId": "STAFF003",
+      "firstName": "Eve",
+      "lastName": "Brown",
+      "position": "doctor",
+      "departmentId": 1,
+      "createdAt": "2025-06-08T03:13:08Z",
+      "isDeleted": 0
+    }
+  ],
+  "Department": [
+    {
+      "id": 1,
+      "name": "Computer Science",
+      "code": "CSE",
+      "hodId": 1,
+      "facultyId": 1,
+      "isDeleted": 0
+    },
+    {
+      "id": 2,
+      "name": "Literature",
+      "code": "LIT",
+      "hodId": 2,
+      "facultyId": 2,
+      "isDeleted": 0
+    },
+    {
+      "id": 3,
+      "name": "New Arts Department",
+      "code": "ART001",
+      "hodId": 1,
+      "facultyId": 3,
+      "isDeleted": 0
+    }
+  ],
+  "Dean": [
+    {
+      "id": 1,
+      "staffId": 1,
+      "facultyId": 2,
+      "isDeleted": 0
+    }
+  ],
+  "Result": [
+    {
+      "id": 1,
+      "studentId": 1,
+      "courseId": 4,
+      "academicSessionId": 2,
+      "semesterId": 3,
+      "score": 33.26,
+      "grade": "C"
+    },
+    {
+      "id": 2,
+      "studentId": 1,
+      "courseId": 6,
+      "academicSessionId": 1,
+      "semesterId": 1,
+      "score": 53.19,
+      "grade": "C"
+    },
+    {
+      "id": 3,
+      "studentId": 2,
+      "courseId": 6,
+      "academicSessionId": 2,
+      "semesterId": 3,
+      "score": 63.73,
+      "grade": "C"
+    },
+    {
+      "id": 4,
+      "studentId": 1,
+      "courseId": 4,
+      "academicSessionId": 2,
+      "semesterId": 3,
+      "score": 78.07,
+      "grade": "E"
+    },
+    {
+      "id": 5,
+      "studentId": 2,
+      "courseId": 2,
+      "academicSessionId": 1,
+      "semesterId": 3,
+      "score": 39.26,
+      "grade": "F"
+    },
+    {
+      "id": 6,
+      "studentId": 2,
+      "courseId": 4,
+      "academicSessionId": 2,
+      "semesterId": 2,
+      "score": 10.97,
+      "grade": "F"
+    },
+    {
+      "id": 7,
+      "studentId": 1,
+      "courseId": 2,
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "score": 19.09,
+      "grade": "D"
+    },
+    {
+      "id": 8,
+      "studentId": 1,
+      "courseId": 6,
+      "academicSessionId": 2,
+      "semesterId": 2,
+      "score": 90.8,
+      "grade": "D"
+    },
+    {
+      "id": 9,
+      "studentId": 2,
+      "courseId": 5,
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "score": 43.15,
+      "grade": "C"
+    },
+    {
+      "id": 10,
+      "studentId": 2,
+      "courseId": 5,
+      "academicSessionId": 1,
+      "semesterId": 1,
+      "score": 33.9,
+      "grade": "F"
+    },
+    {
+      "id": 11,
+      "studentId": 2,
+      "courseId": 6,
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "score": 4.92,
+      "grade": "E"
+    },
+    {
+      "id": 12,
+      "studentId": 1,
+      "courseId": 6,
+      "academicSessionId": 1,
+      "semesterId": 4,
+      "score": 16.21,
+      "grade": "E"
+    },
+    {
+      "id": 13,
+      "studentId": 1,
+      "courseId": 2,
+      "academicSessionId": 1,
+      "semesterId": 3,
+      "score": 63.14,
+      "grade": "F"
+    },
+    {
+      "id": 14,
+      "studentId": 1,
+      "courseId": 3,
+      "academicSessionId": 2,
+      "semesterId": 3,
+      "score": 25.26,
+      "grade": "D"
+    },
+    {
+      "id": 15,
+      "studentId": 1,
+      "courseId": 4,
+      "academicSessionId": 1,
+      "semesterId": 3,
+      "score": 52.06,
+      "grade": "D"
+    }
+  ],
+  "Semester": [
+    {
+      "id": 1,
+      "name": "First Semester",
+      "academicSessionId": 1
+    },
+    {
+      "id": 2,
+      "name": "Second Semester",
+      "academicSessionId": 1
+    },
+    {
+      "id": 3,
+      "name": "First Semester",
+      "academicSessionId": 2
+    },
+    {
+      "id": 4,
+      "name": "Second Semester",
+      "academicSessionId": 2
+    }
+  ],
+  "Student": [
+    {
+      "id": 1,
+      "userId": null,
+      "studentId": "STU00001",
+      "firstName": "First",
+      "lastName": "Prof",
+      "departmentId": 2,
+      "createdAt": "2025-05-12T16:13:28.744Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 2,
+      "userId": null,
+      "studentId": "STU00003",
+      "firstName": "John",
+      "lastName": "Doe",
+      "departmentId": 1,
+      "createdAt": "2025-05-12T17:49:49.901Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 3,
+      "userId": null,
+      "studentId": "STU001",
+      "firstName": "Henry",
+      "lastName": "Miller",
+      "departmentId": 1,
+      "createdAt": "2023-10-01T19:54:45Z",
+      "isDeleted": 0
+    },
+    {
+      "id": 4,
+      "userId": null,
+      "studentId": "STU002",
+      "firstName": "Grace",
+      "lastName": "Miller",
+      "departmentId": 1,
+      "createdAt": "2024-02-19T09:34:40Z",
+      "isDeleted": 0
+    }
+  ],
+  "Notification": [
+    {
+      "id": 1,
+      "userId": 10,
+      "message": "Important announcement 46",
+      "read": false,
+      "createdAt": "2024-12-22T19:51:54Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "message": "Important announcement 63",
+      "read": false,
+      "createdAt": "2024-05-16T22:02:44Z"
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "message": "Important announcement 94",
+      "read": true,
+      "createdAt": "2025-03-23T03:57:35Z"
+    }
+  ],
+  "Faculty": [
+    {
+      "id": 1,
+      "name": "Science",
+      "code": "SCI",
+      "createdAt": "2025-05-12T10:33:00.757Z",
+      "isDeleted": 0,
+      "updatedAt": "2025-05-12T13:40:56.109Z",
+      "deanId": 4
+    },
+    {
+      "id": 2,
+      "name": "Faculty of Arts",
+      "code": "ART",
+      "createdAt": "2025-05-12T14:41:19.159Z",
+      "isDeleted": 0,
+      "updatedAt": "2025-05-13T10:39:08.525Z",
+      "deanId": 8
+    },
+    {
+      "id": 3,
+      "name": "Faculty of Engineering",
+      "code": "ENG",
+      "createdAt": "2025-05-13T12:12:25.504Z",
+      "isDeleted": 0,
+      "updatedAt": "2025-05-13T12:12:25.504Z",
+      "deanId": null
+    }
+  ],
+  "SchoolSetting": [
+    {
+      "id": 7,
+      "name": "Cyberwizdev University",
+      "address": "123 Education Street, Knowledge City, 12345",
+      "currentAcademicSessionId": 1,
+      "semestersPerSession": 2
+    }
+  ],
+  "AcademicSession": [
+    {
+      "id": 1,
+      "name": "2023/2024"
+    },
+    {
+      "id": 2,
+      "name": "2024/2025"
+    },
+    {
+      "id": 3,
+      "name": "2025/2026"
+    }
+  ],
+  "User": [
+    {
+      "id": 1,
+      "email": "hallelojowuro@gmail.com",
+      "password": "$2a$12$.a/yiN5hYNmKqKo75qBx9uw0UrzwtK6Bgpjx6ABQ9w1GQc3yyAqcW",
+      "role": "Admin",
+      "studentId": null,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T15:04:38.097Z"
+    },
+    {
+      "id": 2,
+      "email": "john.doe@school.com",
+      "password": "$2a$10$ViBB6cNCUeYW033a1/igtut/9Fb9bmjDfrJddZ0iGRu5V6MuneZma",
+      "role": "Student",
+      "studentId": 2,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T15:04:38.097Z"
+    },
+    {
+      "id": 3,
+      "email": "jane.smith@school.com",
+      "password": "$2a$10$ViBB6cNCUeYW033a1/igtut/9Fb9bmjDfrJddZ0iGRu5V6MuneZma",
+      "role": "Student",
+      "studentId": null,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T15:04:38.097Z"
+    },
+    {
+      "id": 4,
+      "email": "prof.johnson@school.com",
+      "password": "$2a$10$2EYlFOp..chzzkCR.rEb3eDnmbPyGRqBagCm1yFBGDIR4Alf./f4q",
+      "role": "Staff",
+      "studentId": null,
+      "staffId": 5,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T15:04:38.097Z"
+    },
+    {
+      "id": 5,
+      "email": "admin@school.com",
+      "password": "$2a$10$ViBB6cNCUeYW033a1/igtut/9Fb9bmjDfrJddZ0iGRu5V6MuneZma",
+      "role": "Admin",
+      "studentId": null,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T15:04:38.097Z"
+    },
+    {
+      "id": 8,
+      "email": "admin@school.cyberwizdev.com.ng",
+      "password": "$2a$10$GDEuaidK0vKk4wGMiqacq.bVae0WYNqT.M.jGYYisSsltFgWeMxe2",
+      "role": "Admin",
+      "studentId": null,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T15:04:38.097Z"
+    },
+    {
+      "id": 9,
+      "email": "student@school.com",
+      "password": "$2a$10$c6muCyfR29fRZA0oiwCnIeG2/dhaph50NsX0iFXN94nTL3btbOa4m",
+      "role": "Student",
+      "studentId": 1,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T13:33:12.404Z"
+    },
+    {
+      "id": 10,
+      "email": "teacher@school.com",
+      "password": "$2a$10$4dJJpu9wqpkUQPouYZ2Dxuhwa9Sgd/IDBsrhmW0FzxE4St0/U/jcu",
+      "role": "Staff",
+      "studentId": null,
+      "staffId": 8,
+      "isDeleted": 0,
+      "createdAt": "2025-05-10T16:17:48.608Z"
+    },
+    {
+      "id": 11,
+      "email": "ore@school.com",
+      "password": "$2a$10$Nr/dyyaXPUoRHjmYJ7GRIeNMpdRxMkFxJuo5BVpIOwU.Qzg3upi6G",
+      "role": "Staff",
+      "studentId": null,
+      "staffId": 1,
+      "isDeleted": 0,
+      "createdAt": "2025-05-12T11:02:58.661Z"
+    },
+    {
+      "id": 12,
+      "email": "oreoluwa@school.com",
+      "password": "$2a$10$nIDkdFtybmrYuYWTQHRzU.W1pHIFORXiyVex6l1SG7uEOo8RZK9eq",
+      "role": "Staff",
+      "studentId": null,
+      "staffId": 4,
+      "isDeleted": 0,
+      "createdAt": "2025-05-12T11:08:19.673Z"
+    },
+    {
+      "id": 13,
+      "email": "ivy.moore87@school.com",
+      "password": "$2a$10$fakehashedpassword",
+      "role": "Student",
+      "studentId": null,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-02-07T08:11:23Z"
+    },
+    {
+      "id": 14,
+      "email": "ivy.moore16@school.com",
+      "password": "$2a$10$fakehashedpassword",
+      "role": "Staff",
+      "studentId": null,
+      "staffId": null,
+      "isDeleted": 0,
+      "createdAt": "2025-12-04T12:57:43Z"
+    }
+  ],
+  "Log": [
+    {
+      "id": 1,
+      "origin": "client",
+      "details": "Random log detail 6",
+      "ipAddress": "192.168.1.140",
+      "userAgent": "Mozilla/5.0 (Random OS) AppleWebKit/344.51 (KHTML, like Gecko) RandomBrowser/40.9",
+      "status": "Failure",
+      "error": null,
+      "createdAt": "2025-06-01T12:22:20Z",
+      "updatedAt": "2025-07-11T08:35:45Z"
+    },
+    {
+      "id": 2,
+      "origin": "client",
+      "details": "Random log detail 12",
+      "ipAddress": "192.168.1.151",
+      "userAgent": "Mozilla/5.0 (Random OS) AppleWebKit/644.37 (KHTML, like Gecko) RandomBrowser/4.6",
+      "status": "Failure",
+      "error": null,
+      "createdAt": "2024-03-09T07:38:55Z",
+      "updatedAt": "2023-06-21T19:00:16Z"
+    },
+    {
+      "id": 3,
+      "origin": "server",
+      "details": "Random log detail 18",
+      "ipAddress": "192.168.1.14",
+      "userAgent": "Mozilla/5.0 (Random OS) AppleWebKit/549.78 (KHTML, like Gecko) RandomBrowser/6.5",
+      "status": "Success",
+      "error": "Random error message 8",
+      "createdAt": "2024-06-16T01:12:36Z",
+      "updatedAt": "2025-01-26T12:47:57Z"
+    },
+    {
+      "id": 4,
+      "origin": "server",
+      "details": "Random log detail 16",
+      "ipAddress": "192.168.1.251",
+      "userAgent": "Mozilla/5.0 (Random OS) AppleWebKit/787.77 (KHTML, like Gecko) RandomBrowser/39.1",
+      "status": "Failure",
+      "error": null,
+      "createdAt": "2023-07-06T20:51:17Z",
+      "updatedAt": "2023-04-27T03:03:06Z"
+    },
+    {
+      "id": 5,
+      "origin": "server",
+      "details": "Random log detail 18",
+      "ipAddress": "192.168.1.64",
+      "userAgent": "Mozilla/5.0 (Random OS) AppleWebKit/123.59 (KHTML, like Gecko) RandomBrowser/17.6",
+      "status": "Success",
+      "error": null,
+      "createdAt": "2023-10-21T13:43:51Z",
+      "updatedAt": "2023-11-20T14:29:31Z"
+    }
+  ]
+}
