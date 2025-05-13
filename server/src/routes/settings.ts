@@ -34,24 +34,29 @@ router.put('/', verifyToken, hasRole('Admin'), settingsValidation, async (req: R
   try {
     const { name, address, currentAcademicSessionId, semestersPerSession } = req.body;
 
-    const settings = await prisma.schoolSetting.upsert({
-      where: { id: 1 },
-      update: {
-        name,
-        address,
-        currentAcademicSessionId: currentAcademicSessionId ? parseInt(currentAcademicSessionId) : null,
-        semestersPerSession
-      },
-      create: {
-        name,
-        address,
-        currentAcademicSessionId: currentAcademicSessionId ? parseInt(currentAcademicSessionId) : null,
-        semestersPerSession
-      },
-      include: {
-        currentAcademicSession: true
-      }
-    });
+    const existingSettings = await prisma.schoolSetting.findFirst();
+
+    let settings
+    if (existingSettings) {
+      settings = await prisma.schoolSetting.update({
+        where: { id: existingSettings.id },
+        data: {
+          name,
+          address,
+          currentAcademicSessionId: Number(currentAcademicSessionId),
+          semestersPerSession,
+        }
+      })
+    } else {
+      settings = await prisma.schoolSetting.create({
+        data: {
+          name,
+          address,
+          currentAcademicSessionId: Number(currentAcademicSessionId),
+          semestersPerSession
+        }
+      })
+    }
 
     res.send(settings);
   } catch (error) {

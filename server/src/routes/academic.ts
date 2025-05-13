@@ -25,6 +25,14 @@ router.get('/sessions', verifyToken, async (_req, res) => {
         semesters: true
       }
     });
+
+    const settings = await prisma.schoolSetting.findFirst()
+
+    sessions.forEach((session) => {
+      if (session.id === settings?.currentAcademicSessionId) {
+        (session as any).current = true
+      }
+    })
     res.send(sessions);
   } catch (error) {
     console.log(error)
@@ -54,10 +62,34 @@ router.get('/sessions/:id', verifyToken, async (req, res) => {
 // Create academic session - Admin only
 router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, semesters } = req.body;
+
+    const createSemesterType = [{
+      name: '',
+    }]
+
+    const updateSemesterType = [
+      {
+        name: '',
+        id: 1
+      }]
+
+    const data: any = {
+      name
+    }
+
+    if (semesters && typeof semesters === typeof createSemesterType) {
+      data.semesters = {
+        create: semesters
+      }
+    } else if (semesters && typeof semesters === typeof updateSemesterType) {
+      data.semesters = {
+        update: semesters
+      }
+    }
 
     const session = await prisma.academicSession.create({
-      data: { name },
+      data,
       include: {
         semesters: true
       }

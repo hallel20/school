@@ -88,3 +88,42 @@ export type Faculty = {
     deanId?: number | null;
     departments: Department[];
 }
+
+export type AcademicSession = {
+    id: number;
+    name: string;
+    semesters: Semester[];
+    results: Result[];
+    current?: boolean;
+    schoolSettingId: number | null;
+    registrations: Registration[];
+}
+
+export type Semester = {
+    id: number;
+    name: string;
+    academicSession: AcademicSession;
+    academicSessionId: number;
+    results: Result[];
+    registrations: Registration[];
+}
+
+export type SchoolSetting = {
+    id: number;
+    name: string;
+    address: string;
+    currentAcademicSessionId: number | null;
+    currentAcademicSession: AcademicSession | null;
+    semestersPerSession: number;
+}
+
+export type Registration = {
+    id: number;
+    studentId: number;
+    semesterId: number;
+    academicSessionId: number;
+    student: Student;
+    semester: Semester;
+    academicSession: AcademicSession;
+    courses: Course[];
+}

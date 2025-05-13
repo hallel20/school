@@ -1,44 +1,23 @@
-import { useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import PageHeader from '../../components/ui/PageHeader';
-import Table from '../../components/ui/Table';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
+import { useNavigate } from 'react-router-dom';
+import PageHeader from '../../../components/ui/PageHeader';
+import Table from '../../../components/ui/Table';
+import Button from '../../../components/ui/Button';
+import Card from '../../../components/ui/Card';
 import { PlusCircle, Edit, Trash, Eye, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// Mock data
-const mockSessions = [
-  {
-    id: 1,
-    name: '2023/2024',
-    current: true,
-    semesters: ['First Semester', 'Second Semester'],
-  },
-  {
-    id: 2,
-    name: '2022/2023',
-    current: false,
-    semesters: ['First Semester', 'Second Semester'],
-  },
-  {
-    id: 3,
-    name: '2021/2022',
-    current: false,
-    semesters: ['First Semester', 'Second Semester'],
-  },
-];
+import useFetch from '@/hooks/useFetch';
+import { AcademicSession } from '@/types';
 
 const SessionsList = () => {
-  const [sessions, setSessions] = useState(mockSessions);
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+    const { data: sessions, loading: isLoading } = useFetch<AcademicSession[]>('/academic/sessions');
 
   const columns = [
     { header: 'Name', accessor: 'name' },
     {
       header: 'Current',
-      accessor: (session: any) => (
+      accessor: (session: AcademicSession) => (
         <div className="flex justify-center">
           {session.current && <Check size={18} className="text-green-500" />}
         </div>
@@ -47,11 +26,11 @@ const SessionsList = () => {
     },
     {
       header: 'Semesters',
-      accessor: (session: any) => session.semesters.join(', '),
+      accessor: (session: AcademicSession) => session.semesters?.map(semester => semester.name).join(", "),
     },
     {
       header: 'Actions',
-      accessor: (session: any) => (
+      accessor: (session: AcademicSession) => (
         <div className="flex space-x-2">
           <button
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -108,8 +87,8 @@ const SessionsList = () => {
           data={sessions}
           keyField="id"
           isLoading={isLoading}
-          onRowClick={(session: any) =>
-            navigate(`/admin/academic-sessions/view/${session.id}`)
+          onRowClick={(session: AcademicSession) =>
+            navigate(`/admin/academic-sessions/edit/${session.id}`)
           }
         />
       </Card>
@@ -117,27 +96,4 @@ const SessionsList = () => {
   );
 };
 
-const SessionView = () => {
-  return <div className="p-4">Session View (Not fully implemented in demo)</div>;
-};
-
-const SessionAdd = () => {
-  return <div className="p-4">Add Session Form (Not fully implemented in demo)</div>;
-};
-
-const SessionEdit = () => {
-  return <div className="p-4">Edit Session Form (Not fully implemented in demo)</div>;
-};
-
-const AcademicSessions = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<SessionsList />} />
-      <Route path="/view/:id" element={<SessionView />} />
-      <Route path="/add" element={<SessionAdd />} />
-      <Route path="/edit/:id" element={<SessionEdit />} />
-    </Routes>
-  );
-};
-
-export default AcademicSessions;
+export default SessionsList;
