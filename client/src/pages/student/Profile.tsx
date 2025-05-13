@@ -6,15 +6,16 @@ import Input from '../../components/ui/Input';
 import { User, Mail, Key, Save } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
+import api from '@/services/api';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, refetch } = useAuth();
 
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || 'Student',
-    lastName: user?.lastName || 'User',
+    firstName: user?.student?.firstName || 'Student',
+    lastName: user?.student?.lastName || 'User',
     email: user?.email || 'student@school.com',
-    studentId: 'STU001',
+    studentId: user?.student?.studentId || '123456',
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -26,7 +27,7 @@ const Profile = () => {
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
-  const handleProfileChange = (e) => {
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({
       ...prev,
@@ -34,7 +35,7 @@ const Profile = () => {
     }));
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({
       ...prev,
@@ -42,37 +43,55 @@ const Profile = () => {
     }));
   };
 
-  const handleProfileSubmit = (e) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProfileLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await api.post('/profile/student/' + user?.student?.id, profileData);
       setIsProfileLoading(false);
       toast.success('Profile updated successfully!');
-    }, 1000);
+      refetch();
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.response?.data?.message || error.message);
+      setIsProfileLoading(false);
+      return;
+    }
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.success('New password and confirm password do not match!');
+      toast.error('New password and confirm password do not match!');
+      return;
+    }
+
+    if (!passwordData.currentPassword) {
+      toast.error('Current password is required!');
       return;
     }
 
     setIsPasswordLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsPasswordLoading(false);
+    try {
+      await api.post('/profile/change-password', passwordData);
       setPasswordData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       });
+      setIsPasswordLoading(false);
       toast.success('Password changed successfully!');
-    }, 1000);
+    } catch (error: any) {
+      console.log(error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          'An unexpected error occured!'
+      );
+    }
   };
 
   return (

@@ -9,6 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refetch: () => void;
   error: string | null;
   sessionLoading: boolean;
 }
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         login,
         logout,
         error,
+        refetch,
         sessionLoading,
       }}
     >
