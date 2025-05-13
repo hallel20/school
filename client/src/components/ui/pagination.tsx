@@ -19,7 +19,7 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex justify-center text-gray-200 border-gray-700 pt-4 mt-6 border-t items-center space-x-2">
+    <div className="flex justify-center text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 pt-4 mt-6 border-t items-center space-x-2">
       <Button
         variant="secondary"
         disabled={currentPage === 1}
