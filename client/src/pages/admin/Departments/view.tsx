@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Department } from '@/types';
-import { DepartmentDetails } from '@/components/Department/DepartmentDetails';
+import { DepartmentDetails } from '@/components/departments/details';
 import useFetch from '@/hooks/useFetch';
 import Spinner from '@/components/ui/Spinner';
 import PageHeader from '@/components/ui/PageHeader';
