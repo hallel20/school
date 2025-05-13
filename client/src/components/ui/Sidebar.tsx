@@ -41,6 +41,7 @@ const Sidebar = ({ role }: SidebarProps) => {
     { title: 'Staff', path: '/admin/staff', icon: <Users size={16} /> },
     { title: 'Students', path: '/admin/students', icon: <Users size={16} /> },
     { title: 'Courses', path: '/admin/courses', icon: <BookOpen size={16} /> },
+    { title: 'Results', path: '/admin/results', icon: <BookOpen size={16} /> },
     {
       title: 'Departments',
       path: '/admin/departments',

@@ -61,9 +61,12 @@ export type Result = {
     id: number;
     studentId: number;
     courseId: number;
+    course?: Course;
+    student?: Student;
     score: number;
-    student: Student;
-    course: Course;
+    grade: string;
+    semesterId: number;
+    academicSessionId: number;
 }
 
 

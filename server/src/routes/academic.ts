@@ -105,11 +105,35 @@ router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async
 // Update academic session - Admin only
 router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, semesters } = req.body;
+
+    const createSemesterType = [{
+      name: '',
+    }]
+
+    const updateSemesterType = [
+      {
+        name: '',
+        id: 1
+      }]
+
+    const data: any = {
+      name
+    }
+
+    if (semesters && typeof semesters === typeof createSemesterType) {
+      data.semesters = {
+        create: semesters
+      }
+    } else if (semesters && typeof semesters === typeof updateSemesterType) {
+      data.semesters = {
+        update: semesters
+      }
+    }
 
     const session = await prisma.academicSession.update({
       where: { id: parseInt(req.params.id) },
-      data: { name },
+      data,
       include: {
         semesters: true
       }
@@ -136,8 +160,18 @@ router.delete('/sessions/:id', verifyToken, hasRole('Admin'), async (req, res) =
 });
 
 // Get all semesters
-router.get('/semesters', verifyToken, async (_req, res) => {
+router.get('/semesters', verifyToken, async (req, res) => {
   try {
+    const { sessionId } = req.query;
+    if (sessionId) {
+      const semesters = await prisma.semester.findMany({
+        where: { academicSessionId: Number(sessionId as string) },
+        include: {
+          academicSession: true
+        }
+      });
+      return res.send(semesters);
+    }
     const semesters = await prisma.semester.findMany({
       include: {
         academicSession: true

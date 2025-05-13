@@ -8,6 +8,7 @@ import {
     getEnrollmentTrendData,
     getPerformanceData,
 } from '../controllers/count';
+import { adminResultHandler } from '../controllers/results';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -15,6 +16,7 @@ router.use(hasRole('Admin'));
 
 router.get('/next-available-id', nextUserIdController);
 router.get('/count', getAdminCount);
+router.get('/results', adminResultHandler)
 router.get('/course-distribution', getCourseDistributionData);
 router.get('/staff-distribution', getStaffDistributionData);
 

@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 
 const SessionsList = lazy(() => import("./home"));
 const AddSession = lazy(() => import("./create"));
-// const EditSession = lazy(() => import("./edit"));
+const EditSession = lazy(() => import('./edit'));
 // const ViewSession = lazy(() => import("./view"))
  
 const AcademicSessions = () => {
@@ -12,7 +12,7 @@ const AcademicSessions = () => {
       <Route path="/" element={<SessionsList />} />
       {/* <Route path="/view/:id" element={<SessionView />} /> */}
       <Route path="/add" element={<AddSession />} />
-      {/* <Route path="/edit/:id" element={<SessionEdit />} /> */}
+      <Route path="/edit/:id" element={<EditSession />} />
     </Routes>
   );
 };
