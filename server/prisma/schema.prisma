@@ -150,6 +150,8 @@ model Result {
   semesterId        Int
   score             Float
   grade             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@unique([studentId, courseId, academicSessionId, semesterId])
 }
