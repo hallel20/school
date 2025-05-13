@@ -105,9 +105,10 @@ type UserFormData = z.infer<typeof UserFormSchema>;
 
 interface UserFormProps {
   user?: User; // Optional user prop for editing
+  account?: 'Staff' | 'Student';
 }
 
-const UserForm: React.FC<UserFormProps> = ({ user }) => {
+const UserForm: React.FC<UserFormProps> = ({ user, account }) => {
   const {
     register,
     handleSubmit,
@@ -119,8 +120,8 @@ const UserForm: React.FC<UserFormProps> = ({ user }) => {
     resolver: zodResolver(UserFormSchema),
     defaultValues: {
       email: user?.email || '',
-      password: user?.password || '',
-      role: user?.role || 'Student', // Default role
+      password: '',
+      role: user?.role || account || 'Student', // Default role
       firstName: user?.staff?.firstName || user?.student?.firstName || '',
       lastName: user?.staff?.lastName || user?.student?.lastName || '',
       position: user?.staff?.position || 'lecturer', // Default position for staff
