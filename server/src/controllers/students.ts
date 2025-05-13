@@ -5,13 +5,25 @@ const prisma = new PrismaClient();
 
 export const GET = async (req: Request, res: Response) => {
     try {
-        const { page = 1, pageSize = 20 } = req.query;
+        const { page = 1, pageSize = 20, search = '' } = req.query;
         const facultyId = req.query.faculty as string;
         const departmentId = req.query.departmentId as string
         
         const where: any = {
             isDeleted: false,
         };
+
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search as string } },
+                { lastName: { contains: search as string } },
+                {
+                    user: {
+                        email: { contains: search as string }
+                    }
+                }
+            ]
+        }
         if (facultyId && facultyId !== "undefined") {
             const departments = await prisma.department.findMany({
                 where: {
@@ -34,6 +46,7 @@ export const GET = async (req: Request, res: Response) => {
         const students = await prisma.student.findMany({
             include: {
                 user: true,
+                department: true,
             },
             where,
             take: pageSizeNumber,

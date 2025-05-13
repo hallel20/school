@@ -5,13 +5,25 @@ const prisma = new PrismaClient();
 
 export const GET = async (req: Request, res: Response) => {
     try {
-        const { page = 1, pageSize = 20 } = req.query;
+        const { page = 1, pageSize = 20, search = '' } = req.query;
         const facultyId = req.query.faculty as string;
         const departmentId = req.query.departmentId as string
-        
+
         const where: any = {
             isDeleted: false,
         };
+
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search as string } },
+                { lastName: { contains: search as string } },
+                {
+                    user: {
+                        email: { contains: search as string }
+                    }
+                }
+            ];
+        }
         if (facultyId && facultyId !== "undefined") {
             const departments = await prisma.department.findMany({
                 where: {
@@ -34,6 +46,7 @@ export const GET = async (req: Request, res: Response) => {
         const staff = await prisma.staff.findMany({
             include: {
                 user: true,
+                department: true,
             },
             where,
             take: pageSizeNumber,
@@ -117,9 +130,18 @@ export const PUT = async (req: Request, res: Response) => {
 
 export const DELETE = async (req: Request, res: Response) => {
     try {
-        await prisma.staff.delete({
+        const deletedStaff = await prisma.staff.update({
             where: { id: parseInt(req.params.id) },
+            data: { isDeleted: true },
         });
+
+        if (deletedStaff.userId) {
+            await prisma.user.update({
+                where: { id: deletedStaff.userId },
+                data: { isDeleted: true },
+            });
+        }
+
         res.status(204).send();
     } catch (error) {
         console.log(error);
