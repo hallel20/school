@@ -97,7 +97,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 // Create course - Admin only
 router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Request, res: Response) => {
   try {
-    const { name, code, credits, lecturerId, departmentId } = req.body;
+    const { name, code, credits, lecturerId, departmentId, yearLevel, semester } = req.body;
 
     const existingCourse = await prisma.course.findUnique({
       where: { code },
@@ -112,6 +112,8 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
         code,
         credits,
         departmentId,
+        semester,
+        yearLevel,
         lecturerId: lecturerId ? parseInt(lecturerId) : null
       },
       include: {
@@ -129,7 +131,7 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
 // Update course - Admin only
 router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
-    const { name, code, credits, lecturerId } = req.body;
+    const { name, code, credits, lecturerId, semester, yearLevel } = req.body;
 
     const course = await prisma.course.update({
       where: { id: parseInt(req.params.id) },
@@ -137,6 +139,8 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
         name,
         code,
         credits,
+        semester,
+        yearLevel,
         lecturerId: lecturerId ? parseInt(lecturerId) : undefined
       },
       include: {

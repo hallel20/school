@@ -3,7 +3,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import Table from '@/components/ui/Table';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { PlusCircle, Edit, Trash, Eye } from 'lucide-react';
+import { PlusCircle, Edit, Trash, Eye, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useFetch from '@/hooks/useFetch';
 import { Department, Faculty } from '@/types'; // Added Faculty
@@ -168,13 +168,22 @@ export default function DepartmentList() {
           title="Department Management"
           subtitle="View and manage all departments"
           actions={
-            <Button
-              variant="primary"
-              leftIcon={<PlusCircle size={16} />}
-              onClick={() => navigate('/admin/departments/add')}
-            >
-              Add Department
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                leftIcon={<BookOpen size={16} />}
+                onClick={() => navigate('/admin/departments/courses')}
+              >
+                Allowed Courses
+              </Button>
+              <Button
+                variant="primary"
+                leftIcon={<PlusCircle size={16} />}
+                onClick={() => navigate('/admin/departments/add')}
+              >
+                Add Department
+              </Button>
+            </div>
           }
         />
         <div className="flex justify-between items-end gap-4 pb-4">

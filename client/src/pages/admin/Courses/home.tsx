@@ -16,6 +16,7 @@ import Input from '@/components/ui/Input'; // Import Input component
 import Select from '@/components/ui/Select'; // Ensure Select is imported if still used for Page Size
 import CustomSelect, { Option } from '@/components/ui/ReSelect'; // Assuming Option is exported or defined in ReSelect
 import useDebounce from '@/hooks/useDebounce'; // Import the useDebounce hook
+import { camelCaseToSentence, capitalizeFirstLetter } from '@/utils';
 
 interface CourseResponse {
   courses: Course[];
@@ -190,6 +191,14 @@ const CoursesList = () => {
           {course.department?.name}
         </Link>
       ),
+    },
+    {
+      header: 'Semester',
+      accessor: (course: Course) => camelCaseToSentence(course.semester),
+    },
+    {
+      header: 'Year',
+      accessor: (course: Course) => capitalizeFirstLetter(course.yearLevel),
     },
     {
       header: 'Actions',

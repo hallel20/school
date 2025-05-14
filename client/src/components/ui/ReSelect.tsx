@@ -21,6 +21,7 @@ interface CustomSelectProps {
   defaultValue?: Option;
   isClearable?: boolean;
   placeholder?: string;
+  label?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = (props) => {

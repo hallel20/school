@@ -9,6 +9,7 @@ import {
     getPerformanceData,
 } from '../controllers/count';
 import { adminResultHandler } from '../controllers/results';
+import { getAllowedCourses, updateAllowedCourses } from '../controllers/courses';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -19,6 +20,8 @@ router.get('/count', getAdminCount);
 router.get('/results', adminResultHandler)
 router.get('/course-distribution', getCourseDistributionData);
 router.get('/staff-distribution', getStaffDistributionData);
+router.get('/allowed-courses', getAllowedCourses)
+router.post('/allowed-courses', updateAllowedCourses)
 
 router.get('/enrollment-trend', getEnrollmentTrendData);
 router.get('/performance', getPerformanceData);

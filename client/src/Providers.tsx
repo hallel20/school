@@ -4,6 +4,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Spinner from "./components/ui/Spinner";
 import { Toaster } from "react-hot-toast";
 import { useTheme } from "./hooks/useTheme";
+import { SettingProvider } from './contexts/SettingContext';
 
 const AppToaster = () => {
   const { theme } = useTheme();
@@ -33,10 +34,14 @@ const AppToaster = () => {
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider> {/* ThemeProvider needs to wrap AuthProvider if AuthProvider uses useTheme, or wrap AppToaster directly */}
+    <ThemeProvider>
+      {' '}
+      {/* ThemeProvider needs to wrap AuthProvider if AuthProvider uses useTheme, or wrap AppToaster directly */}
       <AuthProvider>
-        <AppToaster />
-        <Suspense fallback={<Spinner />}>{children}</Suspense>
+        <SettingProvider>
+          <AppToaster />
+          <Suspense fallback={<Spinner />}>{children}</Suspense>
+        </SettingProvider>
       </AuthProvider>
     </ThemeProvider>
   );

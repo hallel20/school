@@ -12,7 +12,7 @@ interface CardProps {
 const Card = ({ title, subtitle, children, className = '', footer, noPadding = false }: CardProps) => {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-y-auto ${className}`}
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-y-visible ${className}`}
     >
       {(title || subtitle) && (
         <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700">

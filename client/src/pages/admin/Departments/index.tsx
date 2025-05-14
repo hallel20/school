@@ -6,6 +6,7 @@ const CreateDepartment = lazy(() => import('./create'));
 const EditDepartment = lazy(() => import('./edit'));
 const NotFound = lazy(() => import('../../NotFound'));
 const ViewDepartment = lazy(() => import('./view'));
+const DepartmentCourses = lazy(() => import('./courses'));
 
 const Courses = () => {
   return (
@@ -16,6 +17,7 @@ const Courses = () => {
       {/* <Route path="/view/:id" element={<ViewDepartment />} /> */}
       {/* Uncomment the above line if you want to use the ViewDepartment component */}
       <Route path="/:id" element={<ViewDepartment />} />
+      <Route path="/courses/*" element={<DepartmentCourses />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

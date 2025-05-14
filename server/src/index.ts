@@ -21,6 +21,7 @@ import https from 'https';
 
 import { PrismaClient } from '@prisma/client';
 import { logger } from './middleware/logger';
+import handlePrismaError from './middleware/prismaError';
 
 const prisma = new PrismaClient();
 
@@ -54,6 +55,7 @@ app.use(morgan("dev"));
 app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(handlePrismaError)
 
 // Routes
 app.use('/api/auth', authRoutes);

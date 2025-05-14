@@ -41,6 +41,21 @@ export type Staff = {
     userId: number | null;
 }
 
+export enum Semesters {
+    First = 'FirstSemester',
+    Second = 'SecondSemester',
+    Third = 'ThirdSemester',
+    Fourth = 'FourthSemester',
+}
+
+export enum years {
+    First = 'first',
+    Second = 'second',
+    Third = 'third',
+    Fourth = 'fourth',
+    Fifth = 'fifth'
+}
+
 export type Course = {
     id: number;
     name: string;
@@ -48,6 +63,8 @@ export type Course = {
     credits: number;
     students: Student[];
     lecturer: Staff;
+    yearLevel: years;
+    semester: Semesters;
     departmentId: number;
     department: Department;
     results: Result[];
@@ -115,6 +132,7 @@ export type SchoolSetting = {
     id: number;
     name: string;
     address: string;
+    maximumCreditUnit: number;
     currentAcademicSessionId: number | null;
     currentAcademicSession: AcademicSession | null;
     semestersPerSession: number;
@@ -130,3 +148,26 @@ export type Registration = {
     academicSession: AcademicSession;
     courses: Course[];
 }
+
+
+// This structure should align with what your backend provides
+export interface AllowedCourseDetail {
+    id: number;
+    code: string;
+    name: string;
+    credits: number;
+    // any other relevant course fields
+}
+
+export interface AllowedCoursesApiResponseItem {
+    id: number; // ID of the AllowedCourses rule
+    departmentId: number;
+    yearLevel: string; // e.g., 'first', 'second'
+    semester: string; // e.g., 'FirstSemester', 'SecondSemester' (matching Prisma's CourseSemester enum)
+    allowedEntries: Array<{
+        id: number; // AllowedCourseEntry ID
+        course: AllowedCourseDetail;
+    }>;
+}
+
+// The API would return: AllowedCoursesApiResponseItem[]

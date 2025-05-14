@@ -4,12 +4,20 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Course, Department, Faculty, Staff } from '../../types'; // Assuming Department and Faculty are defined in types
+import {
+  Course,
+  Department,
+  Faculty,
+  Semesters,
+  Staff,
+  years,
+} from '../../types'; // Assuming Department and Faculty are defined in types
 import api from '../../services/api';
 import useFetch from '../../hooks/useFetch';
 import Spinner from '../ui/Spinner';
 import Input from '../ui/Input';
 import CustomSelect from '../ui/ReSelect';
+import { useSettings } from '@/hooks/useSettings';
 
 const schema = z.object({
   name: z.string().min(1, 'Course name is required'),
@@ -20,8 +28,16 @@ const schema = z.object({
     .int('Credits must be a whole number'),
   lecturerId: z.coerce.number().min(1, 'Lecturer is required'), // Coerce to number
   facultyId: z.coerce.number().min(1, 'Faculty is required'),
+  yearLevel: z.enum(['first', 'second', 'third', 'fourth', 'fifth', 'sixth']),
+  semesterInYear: z.enum([
+    'FirstSemester',
+    'SecondSemester',
+    'ThirdSemester',
+    'FourthSemester',
+  ]),
   departmentId: z.coerce.number().min(1, 'Department is required'), // Use 'departmentId' as per Course type
 });
+
 
 type FormData = z.infer<typeof schema>;
 
@@ -38,7 +54,8 @@ interface FacultyResponse {
   faculties: Faculty[];
   // Optional: Add pagination fields if your API for faculties returns them
 }
-interface DepartmentForFacultyResponse { // For fetching departments based on faculty
+interface DepartmentForFacultyResponse {
+  // For fetching departments based on faculty
   departments: Department[];
 }
 interface CourseFormProps {
@@ -47,17 +64,19 @@ interface CourseFormProps {
 
 const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
   const navigate = useNavigate();
-  const {
-    data: facultyData,
-    loading: facultiesLoading,
-  } = useFetch<FacultyResponse>('/faculties'); // Fetch all faculties
+  const { data: facultyData, loading: facultiesLoading } =
+    useFetch<FacultyResponse>('/faculties'); // Fetch all faculties
   const faculties = facultyData?.faculties || [];
+
+  const { settings } = useSettings();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // State for departments loaded based on selected faculty
-  const [facultyDepartments, setFacultyDepartments] = useState<Department[]>([]);
+  const [facultyDepartments, setFacultyDepartments] = useState<Department[]>(
+    []
+  );
   const [facultyDepartmentsLoading, setFacultyDepartmentsLoading] =
     useState(false);
   // State for lecturers loaded based on selected department
@@ -81,6 +100,8 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
       facultyId: Number(course?.department?.facultyId) || undefined,
       departmentId: undefined, // Will be set after faculty departments are loaded
       lecturerId: undefined, // Will be set after department lecturers are loaded
+      yearLevel: course?.yearLevel || undefined,
+      semesterInYear: course?.semester || undefined,
     },
   });
 
@@ -94,6 +115,8 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
         facultyId: Number(course.department?.facultyId) || undefined,
         departmentId: undefined, // Will be set by the faculty-department effect
         lecturerId: undefined, // Will be set by the department-lecturer effect
+        yearLevel: course.yearLevel || undefined,
+        semesterInYear: course.semester || undefined,
       });
     } else {
       // For new course, reset all fields
@@ -104,9 +127,19 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
         lecturerId: undefined,
         facultyId: undefined,
         departmentId: undefined,
+        yearLevel: undefined,
+        semesterInYear: undefined,
       });
     }
-  }, [course, reset]);
+  }, [course, reset, settings]);
+
+  // Helper function for ordinal numbers (1st, 2nd, 3rd)
+  const getOrdinal = (n: number) => {
+    if (n <= 0) return n.toString(); // Or handle as an error/default
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0] || 'th');
+  };
 
   const watchedFacultyId = watch('facultyId');
   const watchedDepartmentId = watch('departmentId');
@@ -119,13 +152,20 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
       setDepartmentLecturers([]); // Clear lecturers too
 
       api
-        .get<DepartmentForFacultyResponse>(`/departments?facultyId=${watchedFacultyId}`)
+        .get<DepartmentForFacultyResponse>(
+          `/departments?facultyId=${watchedFacultyId}`
+        )
         .then((response) => {
           const fetchedDepts = response.data.departments || response.data; // Adapt if API structure differs
           setFacultyDepartments(fetchedDepts);
           // Pre-select department if editing and course.departmentId matches a loaded department
-          if (course?.departmentId && fetchedDepts.some(d => d.id === course.departmentId)) {
-            setValue('departmentId', course.departmentId, { shouldValidate: true });
+          if (
+            course?.departmentId &&
+            fetchedDepts.some((d) => d.id === course.departmentId)
+          ) {
+            setValue('departmentId', course.departmentId, {
+              shouldValidate: true,
+            });
           }
         })
         .catch((err) => {
@@ -144,7 +184,7 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
     if (watchedDepartmentId) {
       setDepartmentLecturersLoading(true);
       setDepartmentLecturers([]);
-      
+
       // Assuming API endpoint /users?role=Staff&departmentId=ID
       api
         .get<StaffResponse>(`/staff?&departmentId=${watchedDepartmentId}`)
@@ -152,8 +192,13 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
           const fetchedLecturers = response.data.staff || response.data; // Adapt if API structure differs
           setDepartmentLecturers(fetchedLecturers);
           // Pre-select lecturer if editing and course.lecturer.id matches a loaded lecturer
-          if (course?.lecturer?.id && fetchedLecturers.some(l => l.id === course.lecturer.id)) {
-            setValue('lecturerId', course.lecturer.id, { shouldValidate: true });
+          if (
+            course?.lecturer?.id &&
+            fetchedLecturers.some((l) => l.id === course.lecturer.id)
+          ) {
+            setValue('lecturerId', course.lecturer.id, {
+              shouldValidate: true,
+            });
           }
         })
         .catch((err) => {
@@ -195,10 +240,10 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
     }
   };
 
-  if (facultiesLoading) { // Only initial loading for faculties
+  if (facultiesLoading) {
+    // Only initial loading for faculties
     return <Spinner />;
   }
-
 
   const facultyOptions = faculties.map((fac) => ({
     value: fac.id.toString(),
@@ -216,6 +261,33 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
       lecturer?.lastName || 'N/A'
     } (Staff)`,
   }));
+
+  // Generate yearLevelOptions from Zod schema
+  const yearEnumValues = schema.shape.yearLevel._def.values;
+  const yearLevelOptions = yearEnumValues.map((yearValue, index) => ({
+    value: yearValue,
+    label: `${getOrdinal(index + 1)} Year`,
+  }));
+
+  // Generate semesterOptions from Zod schema, limited by settings.semestersPerSession
+  const semesterEnumValues = schema.shape.semesterInYear._def.values;
+  const semesterOptions = Array.from(
+    {
+      length: Math.min(
+        settings?.semestersPerSession || 0,
+        semesterEnumValues.length
+      ),
+    },
+    (_, i) => {
+      const semesterValue = semesterEnumValues[i];
+      return {
+        value: semesterValue,
+        label: `${getOrdinal(i + 1)} Semester`,
+      };
+    }
+  );
+
+  const currentSemesterInYear = watch('semesterInYear');
 
   return (
     <div className="container mx-auto p-4 mt-7 max-w-3xl">
@@ -254,99 +326,263 @@ const CourseForm: React.FC<CourseFormProps> = ({ course }) => {
               fullWidth
             />
           </div>
+          <div>
+            <label
+              htmlFor="yearLevel"
+              className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300"
+            >
+              Year Level
+            </label>
+            <CustomSelect
+              options={yearLevelOptions}
+              inputId="yearLevel"
+              value={
+                yearLevelOptions.find(
+                  (opt) => opt.value === watch('yearLevel')
+                ) || null
+              }
+              onChange={(option) => {
+                setValue(
+                  'yearLevel',
+                  option ? (option.value as years) : 'first',
+                  { shouldValidate: true }
+                );
+              }}
+              className="w-full"
+            />
+            {errors.yearLevel && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.yearLevel.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="semesterInYear"
+              className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300"
+            >
+              Semester
+            </label>
+            <CustomSelect
+              options={semesterOptions}
+              inputId="semesterInYear"
+              value={
+                semesterOptions.find(
+                  (opt) => opt.value === currentSemesterInYear
+                ) || null
+              }
+              onChange={(option) => {
+                setValue(
+                  'semesterInYear',
+                  option ? (option.value as Semesters) : 'FirstSemester',
+                  { shouldValidate: true }
+                );
+              }}
+              className="w-full"
+              isDisabled={
+                !settings?.semestersPerSession ||
+                settings.semestersPerSession === 0
+              }
+              placeholder={
+                !settings?.semestersPerSession ||
+                settings.semestersPerSession === 0
+                  ? 'Set session semesters in settings'
+                  : 'Select semester'
+              }
+            />
+            {errors.semesterInYear && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.semesterInYear.message}
+              </p>
+            )}
+          </div>
           {/* Faculty Selection */}
-          <div className="md:col-span-2"> {/* Span across two columns for better flow */}
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Step 1: Select a Faculty to see available Departments.</p>
-            <label htmlFor="facultyId" className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300">Faculty</label>
+          <div className="md:col-span-2">
+            {' '}
+            {/* Span across two columns for better flow */}
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              Step 1: Select a Faculty to see available Departments.
+            </p>
+            <label
+              htmlFor="facultyId"
+              className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300"
+            >
+              Faculty
+            </label>
             <CustomSelect
               options={facultyOptions}
               inputId="facultyId"
-              value={facultyOptions.find(opt => Number(opt.value) === watch('facultyId')) || null}
+              value={
+                facultyOptions.find(
+                  (opt) => Number(opt.value) === watch('facultyId')
+                ) || null
+              }
               onChange={(option) => {
-                setValue('facultyId', Number(option?.value) || 0, { shouldValidate: true });
+                setValue('facultyId', Number(option?.value) || 0, {
+                  shouldValidate: true,
+                });
                 // Department will be reset by the useEffect watching facultyId
               }}
               className="w-full"
             />
-            {errors.facultyId && <p className="text-sm text-red-600 mt-1">{errors.facultyId.message}</p>}
+            {errors.facultyId && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.facultyId.message}
+              </p>
+            )}
           </div>
 
           {/* Department Selection - Conditional */}
-          {watchedFacultyId && !facultiesLoading && ( // Ensure faculty isn't still loading from initial fetch
-            <div className="md:col-span-2">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Step 2: Select a Department to see available Lecturers.</p>
-              <label htmlFor="departmentId" className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300">Department</label>
-              {facultyDepartmentsLoading ? (
-                <div className="flex items-center justify-start p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
-                  <svg className="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    {/* SVG Spinner */}
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Loading departments...</span>
-                </div>
-              ) : facultyDepartments.length > 0 ? (
-                <CustomSelect
-                  options={departmentOptions}
-                  inputId="departmentId"
-                  value={departmentOptions.find(opt => Number(opt.value) === watch('departmentId')) || null}
-                  onChange={(option) => {
-                    setValue('departmentId', Number(option?.value) || 0, { shouldValidate: true });
-                  }}
-                  className="w-full"
-                  isDisabled={facultyDepartmentsLoading} // Disable while loading, though covered by conditional render
-                />
-              ) : !facultyDepartmentsLoading && facultyDepartments.length === 0 && ( // Only show if not loading and empty
-                <div className="flex items-center justify-center p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    No departments found for this faculty.
-                  </span>
-                </div>
-              )}
-              {errors.departmentId && !facultyDepartmentsLoading && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.departmentId.message}
+          {watchedFacultyId &&
+            !facultiesLoading && ( // Ensure faculty isn't still loading from initial fetch
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Step 2: Select a Department to see available Lecturers.
                 </p>
-              )}
-            </div>
-          )}
+                <label
+                  htmlFor="departmentId"
+                  className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Department
+                </label>
+                {facultyDepartmentsLoading ? (
+                  <div className="flex items-center justify-start p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      {/* SVG Spinner */}
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Loading departments...
+                    </span>
+                  </div>
+                ) : facultyDepartments.length > 0 ? (
+                  <CustomSelect
+                    options={departmentOptions}
+                    inputId="departmentId"
+                    value={
+                      departmentOptions.find(
+                        (opt) => Number(opt.value) === watch('departmentId')
+                      ) || null
+                    }
+                    onChange={(option) => {
+                      setValue('departmentId', Number(option?.value) || 0, {
+                        shouldValidate: true,
+                      });
+                    }}
+                    className="w-full"
+                    isDisabled={facultyDepartmentsLoading} // Disable while loading, though covered by conditional render
+                  />
+                ) : (
+                  !facultyDepartmentsLoading &&
+                  facultyDepartments.length === 0 && ( // Only show if not loading and empty
+                    <div className="flex items-center justify-center p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        No departments found for this faculty.
+                      </span>
+                    </div>
+                  )
+                )}
+                {errors.departmentId && !facultyDepartmentsLoading && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {errors.departmentId.message}
+                  </p>
+                )}
+              </div>
+            )}
 
           {/* Lecturer Selection - Conditional */}
-          {watchedDepartmentId && !facultyDepartmentsLoading && facultyDepartments.length > 0 && (
-             <div className="md:col-span-2">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Step 3: Select a Lecturer for this course.</p>
-              <label htmlFor="lecturerId" className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300">Lecturer</label>
-              {departmentLecturersLoading ? (
-                 <div className="flex items-center justify-start p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
-                  <svg className="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    {/* SVG Spinner */}
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Loading lecturers...</span>
-                </div>
-              ) : departmentLecturers.length > 0 ? (
-                <CustomSelect
-                  options={lecturerOptions}
-                  inputId="lecturerId"
-                  value={lecturerOptions.find(opt => Number(opt.value) === watch('lecturerId')) || null}
-                  onChange={(option) => {
-                    setValue('lecturerId', Number(option?.value) || 0, { shouldValidate: true });
-                  }}
-                  className="w-full"
-                  isDisabled={departmentLecturersLoading}
-                />
-              ) : !departmentLecturersLoading && departmentLecturers.length === 0 && ( // Only show if not loading and empty
-                <div className="flex items-center justify-center p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    No lecturers found for this department. Select a department first or try a different one.
-                  </span>
-                </div>
-              )}
-              {errors.lecturerId && !departmentLecturersLoading && <p className="text-sm text-red-600 mt-1">{errors.lecturerId.message}</p>}
-            </div>
-          )}
-
+          {watchedDepartmentId &&
+            !facultyDepartmentsLoading &&
+            facultyDepartments.length > 0 && (
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Step 3: Select a Lecturer for this course.
+                </p>
+                <label
+                  htmlFor="lecturerId"
+                  className="block text-sm pb-1 font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Lecturer
+                </label>
+                {departmentLecturersLoading ? (
+                  <div className="flex items-center justify-start p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      {/* SVG Spinner */}
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Loading lecturers...
+                    </span>
+                  </div>
+                ) : departmentLecturers.length > 0 ? (
+                  <CustomSelect
+                    options={lecturerOptions}
+                    inputId="lecturerId"
+                    value={
+                      lecturerOptions.find(
+                        (opt) => Number(opt.value) === watch('lecturerId')
+                      ) || null
+                    }
+                    onChange={(option) => {
+                      setValue('lecturerId', Number(option?.value) || 0, {
+                        shouldValidate: true,
+                      });
+                    }}
+                    className="w-full"
+                    isDisabled={departmentLecturersLoading}
+                  />
+                ) : (
+                  !departmentLecturersLoading &&
+                  departmentLecturers.length === 0 && ( // Only show if not loading and empty
+                    <div className="flex items-center justify-center p-2 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[42px]">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        No lecturers found for this department. Select a
+                        department first or try a different one.
+                      </span>
+                    </div>
+                  )
+                )}
+                {errors.lecturerId && !departmentLecturersLoading && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {errors.lecturerId.message}
+                  </p>
+                )}
+              </div>
+            )}
         </div>
 
         {submitError && (

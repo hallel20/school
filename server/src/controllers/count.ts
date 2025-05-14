@@ -4,21 +4,26 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const getAdminCount = async (_req: Request, res: Response) => {
-    const studentsCount = await prisma.student.count();
-    const staffCount = await prisma.staff.count();
-    const courseCount = await prisma.course.count();
-    const departmentCount = await prisma.department.count();
-    const facultyCount = await prisma.faculty.count();
+    try {
+        const studentsCount = await prisma.student.count();
+        const staffCount = await prisma.staff.count();
+        const courseCount = await prisma.course.count();
+        const departmentCount = await prisma.department.count();
+        const facultyCount = await prisma.faculty.count();
 
-    const response = {
-        studentsCount,
-        staffCount,
-        courseCount,
-        departmentCount,
-        facultyCount,
-    };
+        const response = {
+            studentsCount,
+            staffCount,
+            courseCount,
+            departmentCount,
+            facultyCount,
+        };
 
-    res.json(response);
+        res.json(response);
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: 'Failed to fetch admin count' });
+    }
 };
 
 export const getCourseDistributionData = async (_req: Request, res: Response) => {
@@ -44,19 +49,24 @@ export const getCourseDistributionData = async (_req: Request, res: Response) =>
 };
 
 export const getStaffDistributionData = async (_req: Request, res: Response) => {
-    const staff = await prisma.staff.findMany();
+    try {
+        const staff = await prisma.staff.findMany();
 
-    const professors = staff?.filter(staff => staff.position === 'professor').length;
-    const lecturers = staff?.filter(staff => staff.position === 'lecturer').length;
-    const assistants = staff?.filter(staff => staff.position === 'assistant').length;
+        const professors = staff?.filter(staff => staff.position === 'professor').length;
+        const lecturers = staff?.filter(staff => staff.position === 'lecturer').length;
+        const assistants = staff?.filter(staff => staff.position === 'assistant').length;
 
-    const response = [
-        { name: "Professors", value: professors },
-        { name: "Lecturers", value: lecturers },
-        { name: "Teaching Assistants", value: assistants },
-    ];
+        const response = [
+            { name: "Professors", value: professors },
+            { name: "Lecturers", value: lecturers },
+            { name: "Teaching Assistants", value: assistants },
+        ];
 
-    res.json(response);
+        res.json(response);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'Failed to fetch staff distribution' });
+    }
 };
 
 // --- NEW IMPLEMENTATIONS ---
