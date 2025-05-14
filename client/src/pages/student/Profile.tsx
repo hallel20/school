@@ -7,6 +7,7 @@ import { User, Mail, Key, Save } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
+import { getLevel } from '@/utils/getLevel';
 
 const Profile = () => {
   const { user, refetch } = useAuth();
@@ -116,6 +117,13 @@ const Profile = () => {
 
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Student ID: {profileData.studentId}
+              </p>
+
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Level:{' '}
+                {user?.student?.levelYear
+                  ? `${getLevel(user?.student)}`
+                  : 'N/A'}
               </p>
 
               <div className="w-full border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
