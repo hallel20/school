@@ -34,6 +34,7 @@ model Student {
   results       Result[]
   department    Department     @relation(fields: [departmentId], references: [id])
   departmentId  Int
+  year          year
   isDeleted     Boolean        @default(false)
   createdAt     DateTime       @default(now())
   registrations Registration[]
