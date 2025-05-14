@@ -3,8 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Spinner from "./components/ui/Spinner";
 import { Toaster } from "react-hot-toast";
-import { useTheme } from "./hooks/useTheme";
-import { SettingProvider } from './contexts/SettingContext';
+import { useTheme } from './hooks/useTheme';
 
 const AppToaster = () => {
   const { theme } = useTheme();
