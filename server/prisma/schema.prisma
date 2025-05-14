@@ -109,6 +109,13 @@ model Department {
   isDeleted Boolean   @default(false)
 }
 
+enum CourseSemester {
+  FirstSemester
+  SecondSemester
+  ThirdSemester
+  FourthSemester
+}
+
 model Course {
   id            Int            @id @default(autoincrement())
   name          String
@@ -118,6 +125,7 @@ model Course {
   departmentId  Int
   lecturer      Staff?         @relation(fields: [lecturerId], references: [id])
   lecturerId    Int?
+  semester      CourseSemester @default(FirstSemester)
   students      Student[]      @relation("StudentCourses")
   results       Result[]
   isDeleted     Boolean        @default(false)
