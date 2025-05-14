@@ -495,9 +495,4 @@ const ResultList = () => {
   );
 };
 
-// Dummy ViewResult component - replace with your actual implementation
-// const ViewResult: React.FC<ViewResultProps> = ({ result, open, onClose }) => {
-//   if (!open) return null;
-//   return <div>Viewing result: {result.name} <button onClick={onClose}>Close</button></div>;
-// };
 export default ResultList;
