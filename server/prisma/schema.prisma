@@ -96,17 +96,18 @@ model HOD {
 }
 
 model Department {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  code      String    @unique
-  HOD       HOD?
-  hodId     Int?      @unique
-  faculty   Faculty   @relation(fields: [facultyId], references: [id])
-  facultyId Int
-  courses   Course[]
-  students  Student[]
-  staffs    Staff[]
-  isDeleted Boolean   @default(false)
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  code           String           @unique
+  HOD            HOD?
+  hodId          Int?             @unique
+  faculty        Faculty          @relation(fields: [facultyId], references: [id])
+  facultyId      Int
+  courses        Course[]
+  students       Student[]
+  staffs         Staff[]
+  allowedCourses AllowedCourses[]
+  isDeleted      Boolean          @default(false)
 }
 
 enum CourseSemester {
@@ -116,22 +117,72 @@ enum CourseSemester {
   FourthSemester
 }
 
-model Course {
-  id            Int            @id @default(autoincrement())
-  name          String
-  code          String         @unique
-  credits       Int
-  department    Department     @relation(fields: [departmentId], references: [id])
-  departmentId  Int
-  lecturer      Staff?         @relation(fields: [lecturerId], references: [id])
-  lecturerId    Int?
-  semester      CourseSemester @default(FirstSemester)
-  students      Student[]      @relation("StudentCourses")
-  results       Result[]
-  isDeleted     Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  registrations Registration[]
+enum year {
+  first
+  second
+  third
+  fourth
+  fifth
+  sixth
+  seventh
+  eighth
 }
+
+model Course {
+  id             Int              @id @default(autoincrement())
+  name           String
+  code           String           @unique
+  credits        Int
+  department     Department       @relation(fields: [departmentId], references: [id])
+  departmentId   Int
+  lecturer       Staff?           @relation(fields: [lecturerId], references: [id])
+  lecturerId     Int?
+  yearLevel      year
+  semester       CourseSemester 
+  students       Student[]        @relation("StudentCourses")
+  results        Result[]
+  isDeleted      Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  registrations  Registration[]
+  // Relation to the new join table
+  allowedInEntries AllowedCourseEntry[] // Renamed to reflect it's part of AllowedCourseEntry
+
+  // ... other existing fields and relations
+  prerequisites   Course[]       @relation("CoursePrerequisites")
+  prerequisiteFor Course[]       @relation("CoursePrerequisites")
+}
+
+
+model AllowedCourses {
+  id           Int            @id @default(autoincrement())
+  department   Department     @relation(fields: [departmentId], references: [id])
+  departmentId Int
+  semester     CourseSemester
+  yearLevel    year
+
+  // Relation to the new join table
+  allowedEntries AllowedCourseEntry[] // This links to the entries in the join table
+
+  @@unique([departmentId, semester, yearLevel], name: "unique_allowed_courses_department_semester_year")
+}
+
+// --- New explicit join table: AllowedCourseEntry ---
+model AllowedCourseEntry {
+  id               Int      @id @default(autoincrement())
+
+  allowedCoursesId Int
+  allowedCourses   AllowedCourses @relation(fields: [allowedCoursesId], references: [id], onDelete: Cascade) // If an AllowedCourses rule is deleted, its entries are also deleted.
+
+  courseId         Int
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) // If a Course is deleted, it's removed from all allowed lists.
+
+  createdAt        DateTime @default(now()) // Optional: for auditing
+  updatedAt        DateTime @updatedAt   // Optional: for auditing
+
+  @@unique([allowedCoursesId, courseId], name: "unique_allowed_course_entry_per_rule") // Ensures a course isn't listed twice for the same rule
+}
+
+// --- Updated Course model ---
 
 model Registration {
   id                String          @id
