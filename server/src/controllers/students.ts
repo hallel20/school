@@ -8,7 +8,7 @@ export const GET = async (req: Request, res: Response) => {
         const { page = 1, pageSize = 20, search = '' } = req.query;
         const facultyId = req.query.faculty as string;
         const departmentId = req.query.departmentId as string
-        
+
         const where: any = {
             isDeleted: false,
         };
@@ -76,10 +76,17 @@ export const GET_BY_ID = async (req: Request, res: Response) => {
             where: { id: parseInt(req.params.id) },
             include: {
                 user: true,
+                department: true
             },
         });
         if (!student) {
             return res.status(404).send({ message: "Student not found" });
+        }
+
+        const facultyId = student.department.facultyId;
+
+        if (facultyId) {
+            (student as any).user.facultyId = facultyId;
         }
         res.send(student);
     } catch (error) {

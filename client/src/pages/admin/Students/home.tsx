@@ -14,6 +14,7 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import api from '@/services/api';
 import Input from '@/components/ui/Input'; // Added Input
 import useDebounce from '@/hooks/useDebounce'; // Added useDebounce
+import { getLevel } from '@/utils/getLevel';
 
 interface StudentResponse {
   students: Student[];
@@ -87,10 +88,15 @@ const StudentList = () => {
     { header: 'ID', accessor: 'id' },
     {
       header: 'Full Name',
-      accessor: (student: Student) => student.firstName + ' ' + student.lastName,
+      accessor: (student: Student) =>
+        student.firstName + ' ' + student.lastName,
     },
     { header: 'Email', accessor: (student: Student) => student.user?.email },
-    { header: "Department", accessor: (student: Student) => student.department?.name },
+    { header: 'Level', accessor: (student: Student) => getLevel(student) },
+    {
+      header: 'Department',
+      accessor: (student: Student) => student.department?.name,
+    },
     {
       header: 'Actions',
       accessor: (student: Student) => (
@@ -200,7 +206,9 @@ const StudentList = () => {
           data={students} // Data is now pre-filtered and paginated by the server
           keyField="id"
           isLoading={isLoading}
-          onRowClick={(student) => navigate(`/admin/students/edit/${student.id}`)}
+          onRowClick={(student) =>
+            navigate(`/admin/students/edit/${student.id}`)
+          }
         />
         <Pagination
           onPageChange={handlePageChange}

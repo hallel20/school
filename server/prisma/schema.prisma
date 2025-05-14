@@ -30,11 +30,11 @@ model Student {
   studentId     String         @unique // Unique student identifier
   firstName     String
   lastName      String
+  levelYear     year           @default(first)
   courses       Course[]       @relation("StudentCourses")
   results       Result[]
   department    Department     @relation(fields: [departmentId], references: [id])
   departmentId  Int
-  year          year
   isDeleted     Boolean        @default(false)
   createdAt     DateTime       @default(now())
   registrations Registration[]

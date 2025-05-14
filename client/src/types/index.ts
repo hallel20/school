@@ -23,6 +23,7 @@ export type Student = {
     id: number;
     studentId: string;
     firstName: string;
+    levelYear: years;
     lastName: string;
     userId: number | null;
     user?: User

@@ -9,6 +9,7 @@ import { Department, User, Faculty } from '../../types'; // Added Faculty
 import Select from '../ui/Select';
 import useFetch from '@/hooks/useFetch';
 import Spinner from '../ui/Spinner';
+import { getOrdinal } from '@/utils/getOrdinal';
 
 // Define the Zod schema for user fields
 const baseUserSchema = z.object({
@@ -27,6 +28,7 @@ const baseUserSchema = z.object({
     .optional()
     .nullable()
     .transform((val) => (val ? Number(val) : null)),
+  yearLevel: z.enum(['first', 'second', 'third', 'fourth', 'fifth', 'sixth']),
   departmentId: z
     .union([z.string(), z.number()])
     .optional()
@@ -126,6 +128,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, account }) => {
       lastName: user?.staff?.lastName || user?.student?.lastName || '',
       position: user?.staff?.position || 'lecturer', // Default position for staff
       facultyId: Number(user?.facultyId) || null,
+      yearLevel: user?.student?.levelYear || undefined,
       update: !!user, // Set to true if user is provided (edit mode)
       departmentId:
         Number(user?.staff?.departmentId) ||
@@ -190,6 +193,12 @@ const UserForm: React.FC<UserFormProps> = ({ user, account }) => {
 
   const navigate = useNavigate();
 
+  const yearEnumValues = baseUserSchema.shape.yearLevel._def.values;
+  const yearLevelOptions = yearEnumValues.map((yearValue, index) => ({
+    value: yearValue,
+    label: `${getOrdinal(index + 1)} Year`,
+  }));
+
   const onSubmit: SubmitHandler<UserFormData> = async (data) => {
     setIsSubmitting(true);
     setSubmitError(null);
@@ -219,6 +228,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, account }) => {
 
     if (data.role === 'Staff') {
       submissionData.position = data.position;
+    }
+
+    if (data.role === 'Student') {
+      submissionData.yearLevel = data.yearLevel;
     }
 
     console.log('Submitting user:', submissionData);
@@ -408,6 +421,26 @@ const UserForm: React.FC<UserFormProps> = ({ user, account }) => {
                   </p>
                 )}
               </div>
+            </div>
+          )}
+          {watchedRole === 'Student' && (
+            <div className="mt-2">
+              <Select
+                options={yearLevelOptions}
+                value={
+                  yearLevelOptions.find(
+                    (opt) => opt.value === watch('yearLevel')
+                  )?.value
+                }
+                label="Year Level"
+                {...register('yearLevel')}
+                className="w-full"
+              />
+              {errors.yearLevel && (
+                <p className="text-sm text-red-600 mt-1">
+                  {errors.yearLevel.message}
+                </p>
+              )}
             </div>
           )}
           {watchedRole === 'Staff' && (

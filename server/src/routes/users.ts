@@ -141,7 +141,7 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 // Create user - Admin only
 router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Request, res: Response) => {
   try {
-    const { email, password, role, firstName, lastName, departmentId, position } = req.body;
+    const { email, password, role, firstName, lastName, departmentId, position, yearLevel } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -167,6 +167,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
               firstName,
               lastName,
               departmentId,
+              levelYear: yearLevel,
               studentId: `STU${padToTenThousands(nextStudent)}`
             }
           }
@@ -213,7 +214,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
 // Update user - Admin only
 router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
   try {
-    const { email, role, firstName, lastName, departmentId, position } = req.body;
+    const { email, role, firstName, lastName, departmentId, position, yearLevel } = req.body;
 
     const nextUserIds = await prisma.nextId.findMany()
     const nextStudent = nextUserIds.find((user) => user.tableName === 'student')?.nextId || 1;
@@ -259,6 +260,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
               update: {
                 firstName,
                 lastName,
+                levelYear: yearLevel,
                 departmentId,
               }
             }
@@ -291,6 +293,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
                 firstName,
                 lastName,
                 departmentId,
+                levelYear: yearLevel,
                 studentId: `STU${padToTenThousands(nextStudent)}`
               }
             }
