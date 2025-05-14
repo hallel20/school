@@ -38,10 +38,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       {' '}
       {/* ThemeProvider needs to wrap AuthProvider if AuthProvider uses useTheme, or wrap AppToaster directly */}
       <AuthProvider>
-        <SettingProvider>
-          <AppToaster />
-          <Suspense fallback={<Spinner />}>{children}</Suspense>
-        </SettingProvider>
+        <AppToaster />
+        <Suspense fallback={<Spinner />}>{children}</Suspense>
       </AuthProvider>
     </ThemeProvider>
   );
