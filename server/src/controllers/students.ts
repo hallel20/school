@@ -237,6 +237,8 @@ export const getAvailableCourses = async (req: RequestWithUser, res: Response) =
             academicSessions
         );
 
+        console.log("Target Year Level:", targetYearLevel);
+
         if (!targetYearLevel) {
             // If the utility returns undefined, it means the student is not expected
             // to be in this session/year level (e.g., session before enrollment, or too far in future)

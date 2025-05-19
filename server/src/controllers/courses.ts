@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { CourseSemester, Prisma, PrismaClient, year } from "@prisma/client"
 import { RequestWithUser } from "../middleware/auth";
+import { Semester } from "../utils/enums";
 
 const prisma = new PrismaClient()
 
@@ -96,6 +97,8 @@ export const getAllowedCourses = async (req: Request, res: Response) => {
         return res.status(400).send({ message: "Invalid departmentId." });
     }
 
+    console.log(yearLevel)
+
     try {
         const allowedCoursesRules = await prisma.allowedCourses.findMany({
             where: {
@@ -126,9 +129,12 @@ export const getAllowedCourses = async (req: Request, res: Response) => {
 
 
 export const registerCourses = async (req: RequestWithUser, res: Response) => {
-    const { courseIds } = req.body as {
+    const { courseIds, academicSessionId, semester: rawSemester } = req.body as {
         courseIds: number[];
+        semester: CourseSemester;
+        academicSessionId: string;
     };
+
     const { user } = req;
     if (!user) return
     const { student } = user
@@ -141,7 +147,14 @@ export const registerCourses = async (req: RequestWithUser, res: Response) => {
 
     try {
         const setting = await prisma.schoolSetting.findFirst()
-        const sessionId = setting?.currentAcademicSessionId
+        let sessionId = setting?.currentAcademicSessionId
+        if (academicSessionId) {
+            sessionId = Number(academicSessionId)
+        }
+
+        let semesterIndex = setting?.currentSemester!
+
+        if (rawSemester) semesterIndex = Semester[rawSemester as keyof typeof Semester]
 
         if (!sessionId) throw new Error("Current session id not found!")
         const session = await prisma.academicSession.findUnique({
@@ -154,7 +167,6 @@ export const registerCourses = async (req: RequestWithUser, res: Response) => {
         })
         if (!session) throw new Error("Current session not found!")
 
-        const semesterIndex = setting?.currentSemester
         const semesters = session.semesters
         const semester = semesters[semesterIndex]
         if (!semester) throw new Error("Current semester not found!")

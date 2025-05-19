@@ -29,6 +29,7 @@ export type Student = {
     user?: User
     departmentId: number | null;
     department?: Department | null;
+    createdAt: Date;
 };
 export type Staff = {
     id: number;

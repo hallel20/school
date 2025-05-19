@@ -15,7 +15,9 @@ import {
 } from '@/types';
 import useFetch from '@/hooks/useFetch';
 import { useSettings } from '@/hooks/useSettings';
+import { useAuth } from '@/hooks/useAuth'; // Import useAuth
 import { getOrdinal } from '@/utils/getOrdinal';
+import { getFilteredSessionOptions } from '@/utils/sessionUtils'; // Import the new utility
 import CustomSelect, { Option } from '@/components/ui/ReSelect';
 import toast from 'react-hot-toast';
 
@@ -58,6 +60,7 @@ const CoursesList = () => {
 
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const { user } = useAuth(); // Get user data for enrollment date
   const semestersPerSession = settings?.semestersPerSession || 0;
 
   const { data: academicSessionsData, loading: academicSessionsLoading } =
@@ -86,20 +89,16 @@ const CoursesList = () => {
 
   const sessionOptions: Option[] = useMemo(
     () =>
-      academicSessionsData?.map((session) => {
-        let label = session.name;
-        if (
-          session.id.toString() ===
-          settings?.currentAcademicSessionId?.toString()
-        ) {
-          label = `${label} (Current)`;
-        }
-        return {
-          value: session.id.toString(),
-          label,
-        };
-      }) || [],
-    [academicSessionsData, settings?.currentAcademicSessionId]
+      getFilteredSessionOptions(
+        user?.student?.createdAt,
+        academicSessionsData,
+        settings?.currentAcademicSessionId
+      ),
+    [
+      academicSessionsData,
+      settings?.currentAcademicSessionId,
+      user?.student?.createdAt,
+    ]
   );
 
   const semesterOptions = useMemo(() => {
@@ -136,6 +135,18 @@ const CoursesList = () => {
     let fetchedRegisteredCourses: Course[] = [];
     let fetchedAvailableCoursesFromApi: Course[] = [];
 
+    // Determine if the selected session/semester is the current one
+    const currentSemesterValueFromSettings =
+      settings?.currentSemester !== undefined &&
+      settings.currentSemester !== null &&
+      semestersPerSession > 0
+        ? getSemesterEnumValue(settings.currentSemester, semestersPerSession)
+        : undefined;
+
+    const isCurrentSessionAndSemesterSelected =
+      selectedSession === settings?.currentAcademicSessionId?.toString() &&
+      selectedSemester === currentSemesterValueFromSettings;
+
     try {
       const regPath = `/students/courses/registered?academicSessionId=${selectedSession}&semester=${selectedSemester}`;
       const regResponse = await api.get<Course[]>(regPath);
@@ -149,22 +160,28 @@ const CoursesList = () => {
       setIsLoadingRegistered(false);
     }
 
-    try {
-      const availPath = `/students/courses/available?academicSessionId=${selectedSession}&semester=${selectedSemester}`;
-      const availResponse = await api.get<AllowedCoursesApiResponseItem>(
-        availPath
-      );
-      fetchedAvailableCoursesFromApi =
-        availResponse.data.allowedEntries?.map((entry) => entry.course) || [];
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || 'Failed to load available courses.'
-      );
-      // Keep fetchedAvailableCoursesFromApi as []
-    } finally {
+    // Only fetch available courses if the selected session and semester are the current ones
+    if (isCurrentSessionAndSemesterSelected) {
+      try {
+        const availPath = `/students/courses/available?academicSessionId=${selectedSession}&semester=${selectedSemester}`;
+        const availResponse = await api.get<AllowedCoursesApiResponseItem>(
+          availPath
+        );
+        fetchedAvailableCoursesFromApi =
+          availResponse.data.allowedEntries?.map((entry) => entry.course) || [];
+      } catch (err: any) {
+        toast.error(
+          err.response?.data?.message || 'Failed to load available courses.'
+        );
+        // Keep fetchedAvailableCoursesFromApi as []
+      } finally {
+        setIsLoadingAvailable(false);
+      }
+    } else {
+      // If not current session/semester, set available courses to empty and stop loading
+      fetchedAvailableCoursesFromApi = [];
       setIsLoadingAvailable(false);
     }
-
     // Set registered courses state
     setRegisteredCourses(fetchedRegisteredCourses);
 
@@ -176,7 +193,7 @@ const CoursesList = () => {
       (course) => !registeredCourseIds.has(course.id)
     );
     setAvailableCourses(trulyAvailableCourses);
-  }, [selectedSession, selectedSemester]);
+  }, [selectedSession, selectedSemester, settings, semestersPerSession]);
 
   useEffect(() => {
     fetchAllCourses();

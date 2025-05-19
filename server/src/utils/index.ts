@@ -40,5 +40,5 @@ export const getStudentYearLevelForSession = (
   }
 
   const yearLevelIndex = targetSessionIndex - enrollmentSessionIndex;
-  return yearIndexToEnum[yearLevelIndex];
+  return yearIndexToEnum[yearLevelIndex - 1];
 };
