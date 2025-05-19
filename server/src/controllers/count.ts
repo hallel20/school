@@ -22,7 +22,7 @@ export const getAdminCount = async (_req: Request, res: Response) => {
         res.json(response);
     } catch (error) {
         console.error(error)
-        res.status(500).json({ error: 'Failed to fetch admin count' });
+        res.status(500).send({ error: 'Failed to fetch admin count' });
     }
 };
 
@@ -65,7 +65,7 @@ export const getStaffDistributionData = async (_req: Request, res: Response) => 
         res.json(response);
     } catch (error) {
         console.log(error)
-        res.status(500).json({ error: 'Failed to fetch staff distribution' });
+        res.status(500).send({ error: 'Failed to fetch staff distribution' });
     }
 };
 
@@ -104,7 +104,7 @@ export const getEnrollmentTrendData = async (_req: Request, res: Response) => {
         res.json(enrollmentData);
     } catch (error) {
         console.error('Error fetching enrollment trend:', error);
-        res.status(500).json({ error: 'Failed to fetch enrollment trend' });
+        res.status(500).send({ error: 'Failed to fetch enrollment trend' });
     }
 };
 
@@ -146,6 +146,6 @@ export const getPerformanceData = async (_req: Request, res: Response) => {
         res.json(performanceData);
     } catch (error) {
         console.error('Error fetching performance data:', error);
-        res.status(500).json({ error: 'Failed to fetch performance data' });
+        res.status(500).send({ error: 'Failed to fetch performance data' });
     }
 };

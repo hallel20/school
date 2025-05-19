@@ -64,17 +64,17 @@ export async function GET(req: Request, res: Response) {
             totalPages,
             totalFaculties: allFacultiesCount,
         };
-        res.status(200).json(response);
+        res.status(200).send(response);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 
 export async function GET_BY_ID(req: Request, res: Response) {
     const facultyId = Number(req.params.id);
     if (isNaN(facultyId)) {
-        return res.status(400).json({ message: 'Invalid faculty ID format.' });
+        return res.status(400).send({ message: 'Invalid faculty ID format.' });
     }
     try {
         const faculty = await prisma.faculty.findUnique({
@@ -88,12 +88,12 @@ export async function GET_BY_ID(req: Request, res: Response) {
             },
         });
         if (!faculty) {
-            return res.status(404).json({ message: 'Faculty not found.' });
+            return res.status(404).send({ message: 'Faculty not found.' });
         }
-        res.status(200).json(faculty);
+        res.status(200).send(faculty);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 
@@ -107,10 +107,10 @@ export async function POST(req: Request, res: Response) {
                 deanId: deanId ? Number(deanId) : undefined,
             },
         });
-        res.status(201).json(faculty);
+        res.status(201).send(faculty);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 export async function PUT(req: Request, res: Response) {
@@ -125,17 +125,17 @@ export async function PUT(req: Request, res: Response) {
                 deanId: deanId ? Number(deanId) : undefined,
             },
         });
-        res.status(200).json(faculty);
+        res.status(200).send(faculty);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 export async function DELETE(req: Request, res: Response) {
     const facultyId = Number(req.params.id);
 
     if (isNaN(facultyId)) {
-        return res.status(400).json({ message: 'Invalid faculty ID format.' });
+        return res.status(400).send({ message: 'Invalid faculty ID format.' });
     }
 
     try {
@@ -230,10 +230,10 @@ export async function DELETE(req: Request, res: Response) {
     } catch (error: any) {
         // Handle specific Prisma error for "Record to update not found"
         if (error.code === 'P2025') {
-            return res.status(404).json({ message: 'Faculty not found.' });
+            return res.status(404).send({ message: 'Faculty not found.' });
         }
         console.error('Error during faculty soft delete:', error);
-        res.status(500).json({ message: 'Internal server error during soft delete operation.' });
+        res.status(500).send({ message: 'Internal server error during soft delete operation.' });
     }
 }
 
@@ -241,7 +241,7 @@ export async function RESTORE(req: Request, res: Response) {
     const facultyId = Number(req.params.id);
 
     if (isNaN(facultyId)) {
-        return res.status(400).json({ message: 'Invalid faculty ID format.' });
+        return res.status(400).send({ message: 'Invalid faculty ID format.' });
     }
 
     try {
@@ -257,7 +257,7 @@ export async function RESTORE(req: Request, res: Response) {
 
             // Optional: Check if it's already not deleted
             // if (!facultyToRestore.isDeleted) {
-            //     // return res.status(200).json({ message: 'Faculty is already active.' });
+            //     // return res.status(200).send({ message: 'Faculty is already active.' });
             // }
 
             // Step 2: Restore the faculty
@@ -313,12 +313,12 @@ export async function RESTORE(req: Request, res: Response) {
                 }
             }
         });
-        res.status(200).json({ message: 'Faculty and associated entities restored successfully.' });
+        res.status(200).send({ message: 'Faculty and associated entities restored successfully.' });
     } catch (error: any) {
         if (error.code === 'P2025') {
-            return res.status(404).json({ message: error.message || 'Faculty not found for restoration.' });
+            return res.status(404).send({ message: error.message || 'Faculty not found for restoration.' });
         }
         console.error('Error during faculty restore:', error);
-        res.status(500).json({ message: 'Internal server error during restore operation.' });
+        res.status(500).send({ message: 'Internal server error during restore operation.' });
     }
 }

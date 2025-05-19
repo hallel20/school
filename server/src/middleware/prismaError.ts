@@ -6,7 +6,7 @@ const handlePrismaError = (err: any, _req: Request, res: Response, next: NextFun
     if (err instanceof PrismaClientInitializationError) {
         // Log the error for debugging purposes.  Consider using a proper logging library.
         console.error('Database Initialization Error:', err);
-        return res.status(500).json({
+        return res.status(500).send({
             message: 'Database initialization error. Please check your database connection and migrations.',
             error: err.message, // Optionally include the original error message for more details (for development)
         });

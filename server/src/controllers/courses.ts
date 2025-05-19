@@ -21,10 +21,10 @@ export const updateAllowedCourses = async (req: Request, res: Response) => {
 
     // Basic input validation
     if (!courseIds || !Array.isArray(courseIds) || !departmentId || !yearLevel || !semester) {
-        return res.status(400).json({ message: "Missing or invalid parameters. Required: allowedCourses (array of numbers), departmentId, yearLevel, semester." });
+        return res.status(400).send({ message: "Missing or invalid parameters. Required: allowedCourses (array of numbers), departmentId, yearLevel, semester." });
     }
     if (courseIds.some(id => typeof id !== 'number')) {
-        return res.status(400).json({ message: "allowedCourses must be an array of course IDs (numbers)." });
+        return res.status(400).send({ message: "allowedCourses must be an array of course IDs (numbers)." });
     }
 
     try {
@@ -74,10 +74,10 @@ export const updateAllowedCourses = async (req: Request, res: Response) => {
             if (error.code === 'P2003') { // Foreign key constraint failed
                 // The field name might vary based on your schema and the specific constraint violated
                 const fieldName = error.meta?.field_name as string || 'related record';
-                return res.status(400).json({ message: `Invalid input: A course ID provided does not exist or ${fieldName} is invalid.` });
+                return res.status(400).send({ message: `Invalid input: A course ID provided does not exist or ${fieldName} is invalid.` });
             }
         }
-        res.status(500).json({ message: "An error occurred while updating allowed courses." });
+        res.status(500).send({ message: "An error occurred while updating allowed courses." });
     }
 };
 
@@ -88,12 +88,12 @@ export const getAllowedCourses = async (req: Request, res: Response) => {
     };
 
     if (!rawDepartmentId || !yearLevel) {
-        return res.status(400).json({ message: "departmentId and yearLevel query parameters are required." });
+        return res.status(400).send({ message: "departmentId and yearLevel query parameters are required." });
     }
 
     const departmentId = Number(rawDepartmentId);
     if (isNaN(departmentId)) {
-        return res.status(400).json({ message: "Invalid departmentId." });
+        return res.status(400).send({ message: "Invalid departmentId." });
     }
 
     try {
@@ -120,7 +120,7 @@ export const getAllowedCourses = async (req: Request, res: Response) => {
         res.json(allowedCoursesRules);
     } catch (error) {
         console.error("Error fetching allowed courses:", error);
-        res.status(500).json({ message: "An error occurred while fetching allowed courses." });
+        res.status(500).send({ message: "An error occurred while fetching allowed courses." });
     }
 };
 
@@ -136,7 +136,7 @@ export const registerCourses = async (req: RequestWithUser, res: Response) => {
 
     // Validate input
     if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
-        return res.status(400).json({ message: "courseIds must be a non-empty array of course IDs." });
+        return res.status(400).send({ message: "courseIds must be a non-empty array of course IDs." });
     }
 
     try {
@@ -199,9 +199,9 @@ export const registerCourses = async (req: RequestWithUser, res: Response) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             // Handle specific Prisma errors if needed
             if (error.code === 'P2003') { // Foreign key constraint failed
-                return res.status(400).json({ message: "Invalid course ID or related data." });
+                return res.status(400).send({ message: "Invalid course ID or related data." });
             }
         }
-        res.status(500).json({ message: "An error occurred while registering courses." });
+        res.status(500).send({ message: "An error occurred while registering courses." });
     }
 };

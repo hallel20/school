@@ -87,10 +87,10 @@ export async function GET(req: Request, res: Response) {
             totalPages,
             totalDepartments: allDepartmentsCount,
         };
-        res.status(200).json(response);
+        res.status(200).send(response);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 export async function POST(req: Request, res: Response) {
@@ -101,11 +101,11 @@ export async function POST(req: Request, res: Response) {
     });
 
     if (existingDepartment) {
-        return res.status(400).json({ message: 'Department with this code already exists.' });
+        return res.status(400).send({ message: 'Department with this code already exists.' });
     }
 
     if (!name || !code || !facultyId) {
-        return res.status(400).json({ message: 'Name, code, and facultyId are required.' });
+        return res.status(400).send({ message: 'Name, code, and facultyId are required.' });
     }
 
     try {
@@ -135,10 +135,10 @@ export async function POST(req: Request, res: Response) {
                 }
             })
         }
-        res.status(201).json(department);
+        res.status(201).send(department);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 
@@ -151,7 +151,7 @@ export async function PUT(req: Request, res: Response) {
     });
 
     if (existingDepartment && existingDepartment.id !== Number(id)) {
-        return res.status(400).json({ message: 'Department with this code already exists.' });
+        return res.status(400).send({ message: 'Department with this code already exists.' });
     }
 
 
@@ -189,10 +189,10 @@ export async function PUT(req: Request, res: Response) {
                 facultyId: facultyId ? Number(facultyId) : undefined,
             },
         });
-        res.status(200).json(department);
+        res.status(200).send(department);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 
@@ -200,7 +200,7 @@ export async function DELETE(req: Request, res: Response) {
     const departmentId = Number(req.params.id);
 
     if (isNaN(departmentId)) {
-        return res.status(400).json({ message: 'Invalid department ID format.' });
+        return res.status(400).send({ message: 'Invalid department ID format.' });
     }
 
     try {
@@ -265,10 +265,10 @@ export async function DELETE(req: Request, res: Response) {
         res.status(204).send();
     } catch (error: any) {
         if (error.code === 'P2025') { // Prisma error code for "Record to update not found"
-            return res.status(404).json({ message: 'Department not found.' });
+            return res.status(404).send({ message: 'Department not found.' });
         }
         console.error('Error during department soft delete:', error);
-        res.status(500).json({ message: 'Internal server error during soft delete operation.' });
+        res.status(500).send({ message: 'Internal server error during soft delete operation.' });
     }
 }
 
@@ -310,7 +310,7 @@ export async function GET_BY_ID(req: Request, res: Response) {
 
         })
         if (!department) {
-            return res.status(404).json({ message: 'Department not found' });
+            return res.status(404).send({ message: 'Department not found' });
         }
 
         const hodId = department.hodId
@@ -333,10 +333,10 @@ export async function GET_BY_ID(req: Request, res: Response) {
             (department as any).hod = headOfDepartment?.staff
         }
 
-        res.status(200).json(department);
+        res.status(200).send(department);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error' });
     }
 }
 
@@ -344,7 +344,7 @@ export async function handleRestore(req: Request, res: Response) {
     const departmentId = Number(req.params.id);
 
     if (isNaN(departmentId)) {
-        return res.status(400).json({ message: 'Invalid department ID format.' });
+        return res.status(400).send({ message: 'Invalid department ID format.' });
     }
 
     try {
@@ -402,12 +402,12 @@ export async function handleRestore(req: Request, res: Response) {
                 await tx.user.updateMany({ where: { id: { in: allUserIdsToRestore }, isDeleted: true }, data: { isDeleted: false } });
             }
         });
-        res.status(200).json({ message: 'Department and associated entities restored successfully.' });
+        res.status(200).send({ message: 'Department and associated entities restored successfully.' });
     } catch (error: any) {
         if (error.code === 'P2025') {
-            return res.status(404).json({ message: error.message || 'Department not found for restoration.' });
+            return res.status(404).send({ message: error.message || 'Department not found for restoration.' });
         }
         console.error('Error during department restore:', error);
-        res.status(500).json({ message: 'Internal server error during restore operation.' });
+        res.status(500).send({ message: 'Internal server error during restore operation.' });
     }
 }

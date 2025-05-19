@@ -23,7 +23,7 @@ export const adminResultHandler = async (req: Request, res: Response) => {
         };
 
         if (!studentId) {
-            return res.status(400).json({ message: 'Student ID is required.' });
+            return res.status(400).send({ message: 'Student ID is required.' });
         }
 
         const pageNumber = parseInt(page, 10);
@@ -102,7 +102,7 @@ export const adminResultHandler = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Failed to fetch results:', error);
-        res.status(500).json({ message: 'Failed to fetch results' });
+        res.status(500).send({ message: 'Failed to fetch results' });
     }
 };
 
