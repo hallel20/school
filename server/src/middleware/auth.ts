@@ -1,9 +1,14 @@
 import jwt from 'jsonwebtoken';
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient, Staff, Student, User } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 
+interface RequestUser extends User {
+  student?: Student;
+  staff?: Staff;
+}
+
 export interface RequestWithUser extends Request {
-  user?: User;
+  user?: RequestUser;
 }
 
 const prisma = new PrismaClient();
@@ -37,7 +42,11 @@ export const verifyToken = async (req: RequestWithUser, res: Response, next: Nex
       return res.status(401).send({ message: 'Invalid token' });
     }
 
-    req.user = user;
+    req.user = {
+      ...user,
+      student: user.student || undefined,
+      staff: user.staff || undefined,
+    };
     next();
   } catch (error) {
     console.log(error)
@@ -48,6 +57,9 @@ export const verifyToken = async (req: RequestWithUser, res: Response, next: Nex
 // Role-based middleware
 export const hasRole = (...roles: string[]) => {
   return (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (req.user?.role === "Admin") {
+      next()
+    }
     if (!req.user) {
       return res.status(401).send({ message: 'Unauthorized' });
     }

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { RequestWithUser } from "../middleware/auth";
 
 const prisma = new PrismaClient();
 
@@ -186,5 +187,38 @@ export const getStudentByDepartment = async (req: Request, res: Response) => {
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Server error" });
+    }
+}
+
+
+export const getAvailableCourses = async (req: RequestWithUser, res: Response) => {
+    const { user } = req;
+    if (!user) return
+
+    try {
+        const allowedCourses = await prisma.allowedCourses.findFirst({
+            where: {
+                departmentId: user.student?.departmentId,
+                yearLevel: user.student?.levelYear,
+            },
+            include: {
+                allowedEntries: {
+                    include: {
+                        course: {
+                            include: {
+                                lecturer: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log(allowedCourses)
+
+        res.json(allowedCourses)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ message: "Server error" })
     }
 }
