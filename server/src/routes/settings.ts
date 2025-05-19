@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole } from '../middleware/auth';
+import { verifyAdmin, verifyToken } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -30,7 +30,7 @@ router.get('/', verifyToken, async (_req: Request, res: Response) => {
 });
 
 // Update school settings - Admin only
-router.put('/', verifyToken, hasRole('Admin'), settingsValidation, async (req: Request, res: Response) => {
+router.put('/', verifyToken, verifyAdmin, settingsValidation, async (req: Request, res: Response) => {
   try {
     const { name, address, currentAcademicSessionId, semestersPerSession } = req.body;
 

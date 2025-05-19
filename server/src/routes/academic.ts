@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole } from '../middleware/auth';
+import { verifyAdmin, verifyToken } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -60,7 +60,7 @@ router.get('/sessions/:id', verifyToken, async (req, res) => {
 });
 
 // Create academic session - Admin only
-router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async (req: Request, res: Response) => {
+router.post('/sessions', verifyToken, verifyAdmin, sessionValidation, async (req: Request, res: Response) => {
   try {
     const { name, semesters } = req.body;
 
@@ -103,7 +103,7 @@ router.post('/sessions', verifyToken, hasRole('Admin'), sessionValidation, async
 });
 
 // Update academic session - Admin only
-router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, async (req: Request, res: Response) => {
+router.put('/sessions/:id', verifyToken, verifyAdmin, sessionValidation, async (req: Request, res: Response) => {
   try {
     const { name, semesters } = req.body;
 
@@ -147,7 +147,7 @@ router.put('/sessions/:id', verifyToken, hasRole('Admin'), sessionValidation, as
 });
 
 // Delete academic session - Admin only
-router.delete('/sessions/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.delete('/sessions/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     await prisma.academicSession.delete({
       where: { id: parseInt(req.params.id) }
@@ -204,7 +204,7 @@ router.get('/semesters/:id', verifyToken, async (req, res) => {
 });
 
 // Create semester - Admin only
-router.post('/semesters', verifyToken, hasRole('Admin'), semesterValidation, async (req: Request, res: Response) => {
+router.post('/semesters', verifyToken, verifyAdmin, semesterValidation, async (req: Request, res: Response) => {
   try {
     const { name, academicSessionId } = req.body;
 
@@ -226,7 +226,7 @@ router.post('/semesters', verifyToken, hasRole('Admin'), semesterValidation, asy
 });
 
 // Update semester - Admin only
-router.put('/semesters/:id', verifyToken, hasRole('Admin'), semesterValidation, async (req: Request, res: Response) => {
+router.put('/semesters/:id', verifyToken, verifyAdmin, semesterValidation, async (req: Request, res: Response) => {
   try {
     const { name, academicSessionId } = req.body;
 
@@ -249,7 +249,7 @@ router.put('/semesters/:id', verifyToken, hasRole('Admin'), semesterValidation, 
 });
 
 // Delete semester - Admin only
-router.delete('/semesters/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.delete('/semesters/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     await prisma.semester.delete({
       where: { id: parseInt(req.params.id) }

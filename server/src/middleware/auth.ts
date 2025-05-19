@@ -54,24 +54,6 @@ export const verifyToken = async (req: RequestWithUser, res: Response, next: Nex
   }
 };
 
-// Role-based middleware
-export const hasRole = (...roles: string[]) => {
-  return (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (req.user?.role === "Admin") {
-      next()
-    }
-    if (!req.user) {
-      return res.status(401).send({ message: 'Unauthorized' });
-    }
-
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).send({ message: 'Forbidden' });
-    }
-
-    next();
-  };
-};
-
 // Resource ownership middleware for students
 export const isOwnResource = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (req.user?.role === 'Admin') {

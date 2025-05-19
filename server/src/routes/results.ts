@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole, isCourseLecturer, RequestWithUser } from '../middleware/auth';
+import { verifyToken, verifyAdmin, isCourseLecturer, RequestWithUser, verifyStaff } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -36,7 +36,7 @@ router.get('/student/:studentId', verifyToken, async (req: RequestWithUser, res:
 });
 
 // Get course results - Staff only
-router.get('/course/:courseId', verifyToken, hasRole('Staff'), isCourseLecturer, async (req, res) => {
+router.get('/course/:courseId', verifyToken, verifyStaff, isCourseLecturer, async (req, res) => {
   try {
     const results = await prisma.result.findMany({
       where: { courseId: parseInt(req.params.courseId) },
@@ -56,7 +56,7 @@ router.get('/course/:courseId', verifyToken, hasRole('Staff'), isCourseLecturer,
 // Create/Update result - Staff only
 router.post('/course/:courseId/student/:studentId',
   verifyToken,
-  hasRole('Staff'),
+  verifyStaff,
   isCourseLecturer,
   resultValidation,
   async (req: RequestWithUser, res: Response) => {
@@ -100,7 +100,7 @@ router.post('/course/:courseId/student/:studentId',
   });
 
 // Delete result - Admin only
-router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     await prisma.result.delete({
       where: { id: parseInt(req.params.id) }

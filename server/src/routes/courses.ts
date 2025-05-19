@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole, isCourseLecturer, RequestWithUser } from '../middleware/auth';
+import { verifyToken, verifyAdmin, isCourseLecturer, RequestWithUser, verifyStudent, verifyStaff } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -55,6 +55,9 @@ router.get('/', verifyToken, async (req: Request, res: Response) => {
       where,
       take: pageSizeNumber,
       skip: (pageNumber - 1) * pageSizeNumber,
+      orderBy: {
+        id: 'desc',
+      },
     });
     const allCoursesCount = await prisma.course.count();
     const totalPages = Math.ceil(allCoursesCount / pageSizeNumber);
@@ -95,9 +98,9 @@ router.get('/:id', verifyToken, async (req, res) => {
 });
 
 // Create course - Admin only
-router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Request, res: Response) => {
+router.post('/', verifyToken, verifyAdmin, courseValidation, async (req: Request, res: Response) => {
   try {
-    const { name, code, credits, lecturerId, departmentId, yearLevel, semester } = req.body;
+    const { name, code, credits, lecturerId, departmentId, yearLevel, semesterInYear } = req.body;
 
     const existingCourse = await prisma.course.findUnique({
       where: { code },
@@ -112,7 +115,7 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
         code,
         credits,
         departmentId,
-        semester,
+        semester: semesterInYear,
         yearLevel,
         lecturerId: lecturerId ? parseInt(lecturerId) : null
       },
@@ -129,7 +132,7 @@ router.post('/', verifyToken, hasRole('Admin'), courseValidation, async (req: Re
 });
 
 // Update course - Admin only
-router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.put('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { name, code, credits, lecturerId, semester, yearLevel } = req.body;
 
@@ -156,7 +159,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 });
 
 // Delete course - Admin only
-router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     await prisma.course.delete({
       where: { id: parseInt(req.params.id) }
@@ -169,7 +172,7 @@ router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 });
 
 // Register student for course
-router.post('/:id/register', verifyToken, hasRole('Student'), async (req: RequestWithUser, res: Response) => {
+router.post('/:id/register', verifyToken, verifyStudent, async (req: RequestWithUser, res: Response) => {
   try {
     const studentId = req.user?.studentId;
     if (!studentId) throw new Error('Student ID not found');
@@ -190,7 +193,7 @@ router.post('/:id/register', verifyToken, hasRole('Student'), async (req: Reques
 });
 
 // Get course students - Staff only
-router.get('/:id/students', verifyToken, hasRole('Staff'), isCourseLecturer, async (req, res) => {
+router.get('/:id/students', verifyToken, verifyStaff, isCourseLecturer, async (req, res) => {
   try {
     const course = await prisma.course.findUnique({
       where: { id: parseInt(req.params.id) },

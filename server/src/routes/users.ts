@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, hasRole } from '../middleware/auth';
+import { verifyAdmin, verifyToken } from '../middleware/auth';
 import { padToTenThousands } from '../utils';
 
 const router = express.Router();
@@ -16,7 +16,7 @@ const userValidation = [
 ];
 
 // Get all users - Admin only
-router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Response) => {
+router.get('/', verifyToken, verifyAdmin, async (req: Request, res: Response) => {
   try {
     const { page = 1, pageSize = 20, role, search = '' } = req.query;
     const pageNumber = Number(page);
@@ -104,7 +104,7 @@ router.get('/', verifyToken, hasRole('Admin'), async (req: Request, res: Respons
 });
 
 // Get user by ID - Admin only
-router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.get('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: parseInt(req.params.id), isDeleted: false },
@@ -139,7 +139,7 @@ router.get('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 });
 
 // Create user - Admin only
-router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Request, res: Response) => {
+router.post('/', verifyToken, verifyAdmin, userValidation, async (req: Request, res: Response) => {
   try {
     const { email, password, role, firstName, lastName, departmentId, position, yearLevel } = req.body;
 
@@ -212,7 +212,7 @@ router.post('/', verifyToken, hasRole('Admin'), userValidation, async (req: Requ
 });
 
 // Update user - Admin only
-router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.put('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { email, role, firstName, lastName, departmentId, position, yearLevel } = req.body;
 
@@ -339,7 +339,7 @@ router.put('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
 });
 
 // Delete user - Admin only
-router.delete('/:id', verifyToken, hasRole('Admin'), async (req, res) => {
+router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     await prisma.user.update({
       where: { id: parseInt(req.params.id) },
