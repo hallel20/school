@@ -4,6 +4,8 @@ import { useAuth } from '../hooks/useAuth';
 import { School, AtSign, Lock } from 'lucide-react';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import { AxiosError } from 'axios';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +25,16 @@ const Login = () => {
       await login(email, password);
     } catch (err) {
       console.error(err);
-      setError('Invalid email or password');
+      if ((err as AxiosError).response?.status === 401)
+        setError('Invalid email or password');
+      else
+        toast.error(
+          // @ts-ignore
+          (err as AxiosError).response?.data?.message ||
+            (err as AxiosError).message === 'Network Error'
+            ? 'Could not connect to the server. Please check your internet connection.'
+            : 'Something went wrong'
+        );
     } finally {
       setIsLoading(false);
     }
