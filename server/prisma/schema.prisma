@@ -24,20 +24,21 @@ model User {
 }
 
 model Student {
-  id            Int            @id @default(autoincrement())
-  user          User?
-  userId        Int?           @unique
-  studentId     String         @unique // Unique student identifier
-  firstName     String
-  lastName      String
-  levelYear     year           @default(first)
-  courses       Course[]       @relation("StudentCourses")
-  results       Result[]
-  department    Department     @relation(fields: [departmentId], references: [id])
-  departmentId  Int
-  isDeleted     Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  registrations Registration[]
+  id                Int                 @id @default(autoincrement())
+  user              User?
+  userId            Int?                @unique
+  studentId         String              @unique // Unique student identifier
+  firstName         String
+  lastName          String
+  levelYear         year                @default(first)
+  courses           Course[]            @relation("StudentCourses")
+  results           Result[]
+  department        Department          @relation(fields: [departmentId], references: [id])
+  departmentId      Int
+  isDeleted         Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  registrations     Registration[]
+  RegistrationEntry RegistrationEntry[]
 }
 
 enum StaffPosition {
@@ -130,23 +131,22 @@ enum year {
 }
 
 model Course {
-  id               Int                  @id @default(autoincrement())
-  name             String
-  code             String               @unique
-  credits          Int
-  department       Department           @relation(fields: [departmentId], references: [id])
-  departmentId     Int
-  lecturer         Staff?               @relation(fields: [lecturerId], references: [id])
-  lecturerId       Int?
-  yearLevel        year
-  semester         CourseSemester
-  students         Student[]            @relation("StudentCourses")
-  results          Result[]
-  isDeleted        Boolean              @default(false)
-  createdAt        DateTime             @default(now())
-  registrations    Registration[]
-  // Relation to the new join table
-  allowedInEntries AllowedCourseEntry[] // Renamed to reflect it's part of AllowedCourseEntry
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  code                String               @unique
+  credits             Int
+  department          Department           @relation(fields: [departmentId], references: [id])
+  departmentId        Int
+  lecturer            Staff?               @relation(fields: [lecturerId], references: [id])
+  lecturerId          Int?
+  yearLevel           year
+  semester            CourseSemester
+  students            Student[]            @relation("StudentCourses")
+  results             Result[]
+  isDeleted           Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  registrationEntries RegistrationEntry[]
+  allowedInEntries    AllowedCourseEntry[] // Renamed to reflect it's part of AllowedCourseEntry
 
   // ... other existing fields and relations
   prerequisites   Course[] @relation("CoursePrerequisites")
@@ -185,16 +185,32 @@ model AllowedCourseEntry {
 // --- Updated Course model ---
 
 model Registration {
-  id                String          @id
-  student           Student         @relation(fields: [studentId], references: [id])
+  id                Int                 @id @default(autoincrement())
+  registrations     RegistrationEntry[]
+  student           Student             @relation(fields: [studentId], references: [id])
   studentId         Int
-  courses           Course[]
-  academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
+  academicSession   AcademicSession     @relation(fields: [academicSessionId], references: [id])
   academicSessionId Int
-  semester          Semester        @relation(fields: [semesterId], references: [id])
+  semester          Semester            @relation(fields: [semesterId], references: [id])
   semesterId        Int
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model RegistrationEntry {
+  id                String           @id @default(cuid())
+  student           Student          @relation(fields: [studentId], references: [id])
+  studentId         Int
+  registration      Registration     @relation(fields: [registrationId], references: [id])
+  registrationId    Int
+  course            Course           @relation(fields: [courseId], references: [id])
+  courseId          Int
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  AcademicSession   AcademicSession? @relation(fields: [academicSessionId], references: [id])
+  academicSessionId Int?
+  Semester          Semester?        @relation(fields: [semesterId], references: [id])
+  semesterId        Int?
 }
 
 model Result {
@@ -216,21 +232,23 @@ model Result {
 }
 
 model AcademicSession {
-  id            Int            @id @default(autoincrement())
-  name          String         @unique // e.g., "2024/2025"
-  semesters     Semester[]
-  results       Result[]
-  schoolSetting SchoolSetting?
-  registrations Registration[]
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique // e.g., "2024/2025"
+  semesters         Semester[]
+  results           Result[]
+  schoolSetting     SchoolSetting?
+  registrations     Registration[]
+  RegistrationEntry RegistrationEntry[]
 }
 
 model Semester {
-  id                Int             @id @default(autoincrement())
+  id                Int                 @id @default(autoincrement())
   name              String // e.g., "First Semester", "Second Semester"
-  academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
+  academicSession   AcademicSession     @relation(fields: [academicSessionId], references: [id])
   academicSessionId Int
   results           Result[]
   registrations     Registration[]
+  RegistrationEntry RegistrationEntry[]
 
   @@unique([academicSessionId, name])
 }
@@ -241,6 +259,7 @@ model SchoolSetting {
   address                  String
   currentAcademicSessionId Int?             @unique
   maximumCreditUnit        Int              @default(22)
+  currentSemester          Int              @default(0)
   currentAcademicSession   AcademicSession? @relation(fields: [currentAcademicSessionId], references: [id])
   semestersPerSession      Int              @default(2)
 }

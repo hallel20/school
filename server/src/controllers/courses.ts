@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { CourseSemester, Prisma, PrismaClient, year } from "@prisma/client"
+import { RequestWithUser } from "../middleware/auth";
 
 const prisma = new PrismaClient()
 
@@ -71,7 +72,7 @@ export const updateAllowedCourses = async (req: Request, res: Response) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             // Example: Catching foreign key constraint violations if a courseId doesn't exist
             if (error.code === 'P2003') { // Foreign key constraint failed
-                 // The field name might vary based on your schema and the specific constraint violated
+                // The field name might vary based on your schema and the specific constraint violated
                 const fieldName = error.meta?.field_name as string || 'related record';
                 return res.status(400).json({ message: `Invalid input: A course ID provided does not exist or ${fieldName} is invalid.` });
             }
@@ -120,5 +121,87 @@ export const getAllowedCourses = async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Error fetching allowed courses:", error);
         res.status(500).json({ message: "An error occurred while fetching allowed courses." });
+    }
+};
+
+
+export const registerCourses = async (req: RequestWithUser, res: Response) => {
+    const { courseIds } = req.body as {
+        courseIds: number[];
+    };
+    const { user } = req;
+    if (!user) return
+    const { student } = user
+    if (!student) return
+
+    // Validate input
+    if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
+        return res.status(400).json({ message: "courseIds must be a non-empty array of course IDs." });
+    }
+
+    try {
+        const setting = await prisma.schoolSetting.findFirst()
+        const sessionId = setting?.currentAcademicSessionId
+
+        if (!sessionId) throw new Error("Current session id not found!")
+        const session = await prisma.academicSession.findUnique({
+            where: {
+                id: sessionId
+            },
+            include: {
+                semesters: true
+            }
+        })
+        if (!session) throw new Error("Current session not found!")
+
+        const semesterIndex = setting?.currentSemester
+        const semesters = session.semesters
+        const semester = semesters[semesterIndex]
+        if (!semester) throw new Error("Current semester not found!")
+
+
+        // Step 1: Create or find the Registration record for the student
+        let registration = await prisma.registration.findFirst({
+            where: {
+                studentId: student.id,
+                academicSessionId: session.id,
+                semesterId: semester.id,
+            },
+        });
+
+        if (!registration) {
+            registration = await prisma.registration.create({
+                data: {
+                    studentId: user.id,
+                    academicSessionId: session.id,
+                    semesterId: semester.id,
+                },
+            });
+        }
+
+        // Step 2: Create RegistrationEntry records for the provided course IDs
+        const registrationEntries = courseIds.map((courseId) => ({
+            registrationId: registration.id,
+            studentId: user.id,
+            courseId,
+            academicSessionId: session.id,
+            semesterId: semester.id,
+        }));
+
+        await prisma.registrationEntry.createMany({
+            data: registrationEntries,
+            skipDuplicates: true, // Avoid duplicate entries
+        });
+
+        res.json({ message: "Courses registered successfully", registrationId: registration.id });
+    } catch (error) {
+        console.error("Error registering courses:", error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            // Handle specific Prisma errors if needed
+            if (error.code === 'P2003') { // Foreign key constraint failed
+                return res.status(400).json({ message: "Invalid course ID or related data." });
+            }
+        }
+        res.status(500).json({ message: "An error occurred while registering courses." });
     }
 };
