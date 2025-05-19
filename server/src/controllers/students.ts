@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client"; // Import CourseSemester
+import { Semester } from "../utils/enums";
 import { RequestWithUser } from "../middleware/auth";
 
 const prisma = new PrismaClient();
@@ -214,7 +215,6 @@ export const getAvailableCourses = async (req: RequestWithUser, res: Response) =
             }
         });
 
-        console.log(allowedCourses)
 
         res.json(allowedCourses)
     } catch (error) {
@@ -222,3 +222,71 @@ export const getAvailableCourses = async (req: RequestWithUser, res: Response) =
         res.status(500).send({ message: "Server error" })
     }
 }
+
+export const getRegisteredCourses = async (req: RequestWithUser, res: Response) => {
+    const { user } = req;
+    if (!user || !user.student) {
+        // This should ideally be caught by middleware, but good for safety
+        return res.status(403).json({ message: "Access denied. Student information not found." });
+    }
+
+    const studentId = user.student.id;
+    const { academicSessionId: rawAcademicSessionId, semester: rawSemester } = req.query;
+
+    if (!rawAcademicSessionId || !rawSemester) {
+        return res.status(400).json({ message: "academicSessionId and semester query parameters are required." });
+    }
+
+    const academicSessionId = Number(rawAcademicSessionId);
+    const semesterIndex = Semester[rawSemester as keyof typeof Semester]; // Expecting the string name like "FirstSemester"
+
+    if (isNaN(academicSessionId)) {
+        return res.status(400).json({ message: "Invalid academicSessionId." });
+    }
+
+    try {
+        // Find the semester ID based on the academicSessionId and semester name
+        const session = await prisma.academicSession.findUnique({
+            where: {
+                id: academicSessionId,
+            },
+            include: {
+                semesters: true,
+            },
+        });
+
+        const sessionSemesters = session?.semesters;
+        if (!sessionSemesters) {
+            return res.status(404).json({ message: "Academic session not found." });
+        }
+
+        const semesterRecord = sessionSemesters[semesterIndex]
+
+        if (!semesterRecord) {
+            // This could happen if the session/semester combination doesn't exist
+            return res.status(404).json({ message: "Academic session or semester not found." });
+        }
+
+        // Find registration entries for the student in the specified session and semester
+        const registeredEntries = await prisma.registrationEntry.findMany({
+            where: {
+                studentId: studentId,
+                academicSessionId: academicSessionId,
+                semesterId: semesterRecord.id, // Use the found semester ID
+            },
+            include: {
+                course: { // Include the course details
+                    include: { // Include lecturer details within the course
+                        lecturer: true
+                    }
+                },
+            },
+        });
+
+        // Return the list of courses from the registration entries
+        res.json(registeredEntries.map(entry => entry.course));
+    } catch (error) {
+        console.error("Error fetching registered courses:", error);
+        res.status(500).json({ message: "An error occurred while fetching registered courses." });
+    }
+};

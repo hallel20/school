@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 export interface Column<T> {
-  header: string;
+  header: string | (() => ReactNode);
   accessor: keyof T | ((row: T) => ReactNode) | string;
   className?: string;
 }
@@ -49,7 +49,11 @@ function Table<T>({
                 scope="col"
                 className={`px-6 py-3 font-medium ${column.className || ''}`}
               >
-                {column.header}
+                {typeof column.header === 'string' ? (
+                  column.header
+                ) : (
+                  <column.header />
+                )}
               </th>
             ))}
           </tr>
