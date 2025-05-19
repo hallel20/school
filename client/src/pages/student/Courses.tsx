@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
@@ -6,53 +6,106 @@ import Button from '../../components/ui/Button';
 import Table from '../../components/ui/Table';
 import Select from '../../components/ui/Select';
 import { Eye, CheckCircle, PlusCircle } from 'lucide-react';
+import {
+  AcademicSession,
+  AllowedCoursesApiResponseItem,
+  Course,
+  Semesters,
+} from '@/types';
+import useFetch from '@/hooks/useFetch';
+import { useSettings } from '@/hooks/useSettings';
+import { getOrdinal } from '@/utils/getOrdinal';
+import CustomSelect, { Option } from '@/components/ui/ReSelect';
+import toast from 'react-hot-toast';
 
-// Mock data
-const mockRegisteredCourses = [
-  { id: 1, code: 'CS101', name: 'Introduction to Computer Science', credits: 3, lecturer: 'Prof. Johnson' },
-  { id: 2, code: 'MATH201', name: 'Advanced Mathematics', credits: 4, lecturer: 'Dr. Smith' },
-  { id: 3, code: 'ENG101', name: 'English Literature', credits: 3, lecturer: 'Prof. Williams' },
-  { id: 4, code: 'PHYS101', name: 'Physics I', credits: 4, lecturer: 'Dr. Brown' },
-  { id: 5, code: 'CS301', name: 'Database Systems', credits: 3, lecturer: 'Prof. Davis' },
-];
+const getSemesterEnumValue = (
+  index: number,
+  semestersPerSession: number
+): Semesters | undefined => {
+  const semesterValues = Object.values(Semesters);
 
-const mockAvailableCourses = [
-  { id: 6, code: 'CS201', name: 'Data Structures', credits: 3, lecturer: 'Dr. Wilson' },
-  { id: 7, code: 'MATH301', name: 'Calculus III', credits: 4, lecturer: 'Prof. Miller' },
-  { id: 8, code: 'PHYS201', name: 'Physics II', credits: 4, lecturer: 'Dr. Taylor' },
-  { id: 9, code: 'ENG201', name: 'Technical Writing', credits: 3, lecturer: 'Prof. Thomas' },
-];
+  // Adjust index to match array indices (starting from 0)
+  const adjustedIndex = index;
+
+  // Check if the index is within the valid range of the enum and the session
+  if (
+    adjustedIndex >= 0 &&
+    adjustedIndex < semestersPerSession &&
+    adjustedIndex < semesterValues.length
+  ) {
+    return semesterValues[adjustedIndex] as Semesters;
+  }
+};
 
 const CoursesList = () => {
-  const [registeredCourses, setRegisteredCourses] = useState(mockRegisteredCourses);
-  const [availableCourses, setAvailableCourses] = useState(mockAvailableCourses);
+  const [registeredCourses, setRegisteredCourses] = useState();
+  const [availableCourses, setAvailableCourses] = useState<Course[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const [selectedSession, setSelectedSession] = useState('1');
-  const [selectedSemester, setSelectedSemester] = useState('1');
+  const [selectedSession, setSelectedSession] = useState<string>();
+  const [selectedSemester, setSelectedSemester] = useState<string>();
   const navigate = useNavigate();
 
+  const { settings } = useSettings();
+  const semestersPerSession = settings?.semestersPerSession || 0;
+
   // Mock data for dropdowns
-  const sessionOptions = [
-    { value: '1', label: '2023/2024' },
-    { value: '2', label: '2022/2023' },
-  ];
-  
-  const semesterOptions = [
-    { value: '1', label: 'First Semester' },
-    { value: '2', label: 'Second Semester' },
-  ];
+
+  const { data: coursesToRegister } = useFetch<AllowedCoursesApiResponseItem>(
+    '/students/courses/available'
+  );
+
+  useEffect(() => {
+    if (coursesToRegister) {
+      const courses = coursesToRegister.allowedEntries?.map(
+        (entry) => entry.course
+      );
+      console.log(coursesToRegister);
+      setAvailableCourses(courses);
+    }
+  }, [coursesToRegister]);
+
+  const { data: academicSessionsData, loading: academicSessionsLoading } =
+    useFetch<AcademicSession[]>('/academic/sessions');
+
+  const sessionOptions: Option[] =
+    academicSessionsData?.map((session) => {
+      let label = session.name;
+      if (session.id === settings?.currentAcademicSessionId) {
+        label = label + ' ' + '(Current)';
+      }
+      return {
+        value: session.id.toString(),
+        label,
+      };
+    }) || [];
+
+  const semesterOptions = useMemo(
+    () =>
+      Array.from({ length: semestersPerSession }, (_, i) => {
+        const val = getSemesterEnumValue(i, semestersPerSession);
+        let label = `${getOrdinal(i + 1)} Semester`;
+        if (i === settings?.currentSemester) {
+          label = label + ' ' + '(Current)';
+        }
+        return { value: val as string, label };
+      }).filter((opt) => opt.value),
+    [semestersPerSession]
+  );
 
   const registeredColumns = [
     { header: 'Code', accessor: 'code' },
     { header: 'Course Name', accessor: 'name' },
     { header: 'Credits', accessor: 'credits' },
-    { header: 'Lecturer', accessor: 'lecturer' },
+    // {
+    //   header: 'Lecturer',
+    //   accessor: (course: Course) => course.lecturer?.firstName,
+    // },
     {
       header: 'Actions',
-      accessor: (course) => (
+      accessor: (course: Course) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -70,10 +123,13 @@ const CoursesList = () => {
     { header: 'Code', accessor: 'code' },
     { header: 'Course Name', accessor: 'name' },
     { header: 'Credits', accessor: 'credits' },
-    { header: 'Lecturer', accessor: 'lecturer' },
+    // {
+    //   header: 'Lecturer',
+    //   accessor: (course: Course) => course.lecturer?.firstName,
+    // },
     {
       header: 'Actions',
-      accessor: (course) => (
+      accessor: (course: Course) => (
         <Button
           size="sm"
           variant="success"
@@ -89,48 +145,86 @@ const CoursesList = () => {
     },
   ];
 
-  const handleRegisterCourse = (course) => {
+  const handleRegisterCourse = (course: Course) => {
     setIsRegistering(true);
-    
+    // toast.promise()
+
     // Simulate API call
     setTimeout(() => {
       // Add to registered courses
-      setRegisteredCourses(prev => [...prev, course]);
-      
+      // setRegisteredCourses((prev) => [...prev, course]);
+
       // Remove from available courses
-      setAvailableCourses(prev => prev.filter(c => c.id !== course.id));
-      
+      setAvailableCourses((prev) => prev?.filter((c) => c.id !== course.id));
+
       setIsRegistering(false);
     }, 1000);
   };
 
+  const handleSessionChange = (option: Option | null) => {
+    if (!option) {
+      setSelectedSemester(undefined);
+    }
+    setSelectedSession(option ? option.value : undefined);
+  };
+
+  const handleSemesterChange = (option: Option | null) => {
+    setSelectedSemester(option ? option.value : undefined);
+  };
+
   return (
     <div className="px-4 py-6">
-      <PageHeader 
-        title="My Courses" 
+      <PageHeader
+        title="My Courses"
         subtitle="View your registered courses and register for new ones"
       />
-      
+
       <Card className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="Academic Session"
-            options={sessionOptions}
-            value={selectedSession}
-            onChange={(e) => setSelectedSession(e.target.value)}
-            fullWidth
-          />
-          
-          <Select
-            label="Semester"
-            options={semesterOptions}
-            value={selectedSemester}
-            onChange={(e) => setSelectedSemester(e.target.value)}
-            fullWidth
-          />
+          <div>
+            <label
+              htmlFor="session-filter"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Academic Session
+            </label>
+            <CustomSelect
+              inputId="session-filter"
+              options={sessionOptions}
+              value={
+                sessionOptions.find((opt) => opt.value === selectedSession) ||
+                null
+              }
+              onChange={handleSessionChange}
+              isLoading={academicSessionsLoading}
+              isClearable
+              placeholder="Select session..."
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="semester-filter"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Semester
+            </label>
+            <CustomSelect
+              inputId="semester-filter"
+              options={semesterOptions}
+              value={
+                semesterOptions.find((opt) => opt.value === selectedSemester) ||
+                null
+              }
+              onChange={handleSemesterChange}
+              isDisabled={!selectedSession}
+              isClearable
+              placeholder="Select semester..."
+            />
+          </div>
         </div>
       </Card>
-      
+
       <Card title="Registered Courses" className="mb-6">
         <Table
           columns={registeredColumns}
@@ -141,7 +235,7 @@ const CoursesList = () => {
           emptyMessage="No courses registered for this semester"
         />
       </Card>
-      
+
       <Card title="Available Courses">
         <Table
           columns={availableColumns}
@@ -156,7 +250,9 @@ const CoursesList = () => {
 };
 
 const CourseView = () => {
-  return <div className="p-4">Course Details (Not fully implemented in demo)</div>;
+  return (
+    <div className="p-4">Course Details (Not fully implemented in demo)</div>
+  );
 };
 
 const Courses = () => {
