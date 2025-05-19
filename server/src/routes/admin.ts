@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken, hasRole } from '../middleware/auth';
+import { verifyToken, verifyAdmin } from '../middleware/auth';
 import { nextUserIdController } from '../controllers/nextUserId';
 import {
     getAdminCount,
@@ -13,7 +13,7 @@ import { getAllowedCourses, updateAllowedCourses } from '../controllers/courses'
 
 const router = express.Router();
 router.use(verifyToken);
-router.use(hasRole('Admin'));
+router.use(verifyAdmin);
 
 router.get('/next-available-id', nextUserIdController);
 router.get('/count', getAdminCount);
