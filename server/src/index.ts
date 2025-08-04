@@ -16,8 +16,6 @@ import studentRoutes from './routes/students';
 import profileRoutes from './routes/profile';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import fs from 'fs';
-import https from 'https';
 
 import { PrismaClient } from '@prisma/client';
 import { logger } from './middleware/logger';
@@ -32,7 +30,10 @@ const env = process.env.NODE_ENV || 'development';
 const app = express();
 
 const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+  origin: function (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) {
     const allowedOrigins = [
       'http://localhost:5173', // Development frontend
       'https://school.cyberwizdev.com.ng', // Production frontend
@@ -48,14 +49,13 @@ const corsOptions = {
   allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
 };
 
-
 // Middleware
 app.use(helmet());
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(handlePrismaError)
+app.use(handlePrismaError);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -65,37 +65,25 @@ app.use('/api/results', resultRoutes);
 app.use('/api/academic', academicRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/logs', logRoutes);
-app.use('/api/admin', adminRoutes)
+app.use('/api/admin', adminRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/faculties', facultyRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/profile', profileRoutes);
 
-
 const PORT = process.env.PORT || 5000;
 
-if (env === 'development') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-} else {
-  const options = {
-    key: fs.readFileSync('/etc/nginx/ssl/api.privkey.pem'), // Adjust the path if necessary inside the container
-    cert: fs.readFileSync('/etc/nginx/ssl/api.fullchain.pem'), // Adjust the path if necessary inside the container
-  };
-
-  https.createServer(options, app).listen(5000, () => {
-    console.log('Server is running on port 5000');
-  });
-}
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // Graceful shutdown
 const shutdown = async () => {
-  console.log("Shutting down gracefully...");
+  console.log('Shutting down gracefully...');
   await prisma.$disconnect();
   process.exit(0);
 };
 
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown); // Handles Ctrl + C
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown); // Handles Ctrl + C
