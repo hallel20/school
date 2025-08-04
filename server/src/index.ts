@@ -25,8 +25,6 @@ const prisma = new PrismaClient();
 
 dotenv.config();
 
-const env = process.env.NODE_ENV || 'development';
-
 const app = express();
 
 const corsOptions = {
